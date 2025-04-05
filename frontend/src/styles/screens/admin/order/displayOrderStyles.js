@@ -127,20 +127,20 @@ const styles = StyleSheet.create({
 
     filterChip: {
         paddingHorizontal: 10,
-        paddingVertical: 4,   
-        borderRadius: 12,     
+        paddingVertical: 4,
+        borderRadius: 12,
         marginRight: 8,
         backgroundColor: '#2A2A2A',
-        height: 28,        
-        justifyContent: 'center', 
+        height: 28,
+        justifyContent: 'center',
     },
     filterChipActive: {
         backgroundColor: '#4CAF50',
     },
     filterText: {
         color: '#FFFFFF',
-        fontSize: 11,       
-        lineHeight: 16,    
+        fontSize: 11,
+        lineHeight: 16,
     },
     filterTextActive: {
         color: '#FFFFFF',
@@ -186,7 +186,16 @@ const styles = StyleSheet.create({
     modalCancelText: {
         color: '#FF5252',
         fontSize: 16,
-    }
+    },
+    updateIcon: {
+        marginLeft: 20, // Add spacing between the badge and the icon
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    statusContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 
 });
 

@@ -68,11 +68,11 @@ const BottomTabNavigator = ({ navigation, route }) => {
   
   // Render different navigators based on user role
   if (isAdmin) {
-    console.log('Redirecting to AdminNavigator'); // Debugging: Log admin navigation
+
     return <AdminNavigator />;
   }
   
-  console.log('Redirecting to User Tabs'); // Debugging: Log user navigation
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

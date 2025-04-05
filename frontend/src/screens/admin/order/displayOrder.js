@@ -312,22 +312,32 @@ const AdminOrderScreen = ({ navigation }) => {
         <View style={styles.orderCard}>
             <View style={styles.orderHeader}>
                 <Text style={styles.orderNumber}>Order #{item._id.slice(-8)}</Text>
-                <TouchableOpacity
-                    style={[
-                        styles.statusBadge,
-                        { backgroundColor: getStatusColor(item.orderStatus) },
-                        item.orderStatus === 'Cancelled' && { opacity: 0.6 } // visually indicate it's disabled
-                    ]}
-                    onPress={() => {
-                        if (item.orderStatus !== 'Cancelled') {
-                            updateOrderStatus(item._id, item.orderStatus);
-                        }
-                    }}
-                    disabled={item.orderStatus === 'Cancelled'}
-                >
-                    <Text style={styles.statusText}>{item.orderStatus}</Text>
-                </TouchableOpacity>
+                <View style={styles.statusContainer}>
+                    {item.orderStatus !== 'Cancelled' && item.orderStatus !== 'Completed' && (
+                        <TouchableOpacity
+                            onPress={() => updateOrderStatus(item._id, item.orderStatus)}
+                            style={styles.updateIcon}
+                        >
+                            <MaterialIcons name="edit" size={20} color="#FFFFFF" />
+                        </TouchableOpacity>
+                    )}
+                    <TouchableOpacity
+                        style={[
+                            styles.statusBadge,
+                            { backgroundColor: getStatusColor(item.orderStatus) },
+                            item.orderStatus === 'Cancelled' && { opacity: 0.6 } // Only dim Cancelled status
+                        ]}
+                        onPress={() => {
+                            if (item.orderStatus !== 'Cancelled' && item.orderStatus !== 'Completed') {
+                                updateOrderStatus(item._id, item.orderStatus);
+                            }
+                        }}
+                        disabled={item.orderStatus === 'Cancelled' || item.orderStatus === 'Completed'}
+                    >
+                        <Text style={styles.statusText}>{item.orderStatus}</Text>
+                    </TouchableOpacity>
 
+                </View>
             </View>
 
             <View style={styles.orderContent}>
