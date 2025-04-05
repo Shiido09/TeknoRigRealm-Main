@@ -273,7 +273,7 @@ export const updateOrderStatus = async (req, res) => {
     order.orderStatus = status;
 
 
-    if (status === 'Delivered') {
+    if (status === 'Completed') {
       order.deliveredAt = Date.now();
     }
 
@@ -289,5 +289,45 @@ export const updateOrderStatus = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+
+export const getTopOrderedProducts = async (req, res) => {
+  try {
+    const topProducts = await Order.aggregate([
+      { $unwind: '$orderItems' },
+      {
+        $group: {
+          _id: '$orderItems.product',
+          totalQuantity: { $sum: '$orderItems.quantity' }
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'productDetails'
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          productId: '$_id',
+          totalQuantity: 1,
+          productDetails: { $arrayElemAt: ['$productDetails', 0] }
+        }
+      }
+    ]);
+
+
+
+    res.status(200).json({ success: true, topProducts });
+  } catch (error) {
+    console.error('Error fetching top ordered products:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch top ordered products' });
   }
 };

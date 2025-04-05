@@ -16,6 +16,9 @@ import {
   ORDER_UPDATE_STATUS_REQUEST,
   ORDER_UPDATE_STATUS_SUCCESS,
   ORDER_UPDATE_STATUS_FAIL,
+  GET_TOP_PRODUCTS_REQUEST,
+  GET_TOP_PRODUCTS_SUCCESS,
+  GET_TOP_PRODUCTS_FAIL,
 } from '../constants/orderConstants';
 import { getItem } from '../../services/authService';
 

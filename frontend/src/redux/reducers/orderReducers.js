@@ -16,6 +16,9 @@ import {
   ORDER_UPDATE_STATUS_REQUEST,
   ORDER_UPDATE_STATUS_SUCCESS,
   ORDER_UPDATE_STATUS_FAIL,
+  GET_TOP_PRODUCTS_REQUEST,
+  GET_TOP_PRODUCTS_SUCCESS,
+  GET_TOP_PRODUCTS_FAIL,
 } from '../constants/orderConstants';
 
 export const orderUpdateStatusReducer = (state = {}, action) => {
@@ -88,6 +91,19 @@ export const orderListMyReducer = (state = { orders: [] }, action) => {
       return { ...state, loading: false, error: action.payload };
     case ORDER_LIST_MY_RESET:
       return { orders: [] };
+    default:
+      return state;
+  }
+};
+
+export const topProductsReducer = (state = { topProducts: [] }, action) => {
+  switch (action.type) {
+    case GET_TOP_PRODUCTS_REQUEST:
+      return { loading: true, topProducts: [] };
+    case GET_TOP_PRODUCTS_SUCCESS:
+      return { loading: false, topProducts: action.payload };
+    case GET_TOP_PRODUCTS_FAIL:
+      return { loading: false, error: action.payload };
     default:
       return state;
   }
