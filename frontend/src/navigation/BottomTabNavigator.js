@@ -50,10 +50,9 @@ const BottomTabNavigator = ({ navigation, route }) => {
       // Fetch user details to check if the user is an admin
       if (userId) {
         try {
-          const userDetails = await getUserById(userId); // Use getUserById to fetch user details
-          console.log('User Details:', userDetails); // Debugging: Log user details
-          // console.log('isAdmin Value:', userDetails.isAdmin); 
-          setIsAdmin(!!userDetails.isAdmin); // Ensure isAdmin is a boolean
+          const userDetails = await getUserById(userId); 
+
+          setIsAdmin(!!userDetails.isAdmin); 
         } catch (error) {
           console.error('Error fetching user details:', error);
         }

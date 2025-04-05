@@ -150,6 +150,43 @@ const styles = StyleSheet.create({
         position: 'absolute', // Position the back button to the left
         left: 15,
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 20,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    modalOption: {
+        width: '100%',
+        padding: 12,
+        borderRadius: 8,
+        backgroundColor: '#2A2A2A',
+        marginBottom: 10,
+        alignItems: 'center',
+    },
+    modalOptionText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    modalCancel: {
+        marginTop: 10,
+    },
+    modalCancelText: {
+        color: '#FF5252',
+        fontSize: 16,
+    }
 
 });
 

@@ -82,6 +82,32 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         marginLeft: 8,
     },
+    productCard: {
+        width: 150,
+        marginRight: 10,
+        backgroundColor: '#1A1A1A',
+        borderRadius: 8,
+        padding: 10,
+        alignItems: 'center',
+      },
+      productImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+        marginBottom: 10,
+      },
+      productName: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 5,
+      },
+      productOrders: {
+        color: '#4CAF50',
+        fontSize: 12,
+        fontWeight: 'bold',
+      },
 });
 
 export default styles;

@@ -4,13 +4,10 @@ import { API_URL } from '../../config/apiConfig';
 
 export const fetchStats = () => async (dispatch) => {
   try {
-    console.log('Dispatching FETCH_STATS_REQUEST...');
     dispatch({ type: FETCH_STATS_REQUEST });
-    
-    console.log('Sending request to API...');
+
     const { data } = await axios.get(`${API_URL}/products/adminStats`);
     
-    console.log('API response received:', data);
     dispatch({
       type: FETCH_STATS_SUCCESS,
       payload: data,
