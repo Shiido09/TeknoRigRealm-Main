@@ -15,6 +15,23 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Create user in Firebase Authentication
+    let firebaseUser;
+    try {
+      firebaseUser = await auth.createUser({
+        email,
+        password,
+        displayName: name,
+      });
+      
+      console.log("Created user in Firebase Auth:", firebaseUser.uid);
+    } catch (firebaseError) {
+      console.error("Error creating Firebase user:", firebaseError);
+      return res.status(400).json({ 
+        message: "Failed to create Firebase user: " + firebaseError.message 
+      });
+    }
+
     // Hash Password
     const hashedPassword = await bcryptjs.hash(password, 10);
     //console.log("Hashed password:", hashedPassword);
@@ -26,7 +43,7 @@ export const registerUser = async (req, res) => {
       avatar = { public_id: result.public_id, url: result.secure_url };
     }
 
-    // Create new user
+    // Create new user in MongoDB with Firebase UID
     const newUser = new User({
       email,
       password: hashedPassword,
@@ -34,6 +51,7 @@ export const registerUser = async (req, res) => {
       address,
       phoneNo,
       avatar,
+      firebaseUid: firebaseUser.uid, // Store Firebase UID
     });
 
     await newUser.save();
