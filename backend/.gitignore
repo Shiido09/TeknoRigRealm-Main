@@ -1,0 +1,3 @@
+
+#git ignore sa backend sa node modules para di marami napupush
+node_modules/

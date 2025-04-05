@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "719082158171",
+    "project_id": "teknorigrealm-8f30d",
+    "storage_bucket": "teknorigrealm-8f30d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719082158171:android:9bced6e722291d170ae77e",
+        "android_client_info": {
+          "package_name": "com.shiidopogi.frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "719082158171-esrkjpmoqkui1hnpimmcvkla0laicd8q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shiidopogi.frontend",
+            "certificate_hash": "4a4372e63cb1a3a5f4a89c3a945aba92474033d7"
+          }
+        },
+        {
+          "client_id": "719082158171-ilh6riiei6797ij23kbsvrecuci93rr2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRxA6wobZ-_lb4k65_579XXK_0Shq6a8k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "719082158171-ilh6riiei6797ij23kbsvrecuci93rr2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
