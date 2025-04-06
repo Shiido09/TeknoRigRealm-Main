@@ -208,7 +208,7 @@ export const getTopOrderedProducts = () => async (dispatch) => {
     dispatch({ type: GET_TOP_PRODUCTS_REQUEST });
 
     const { data } = await axios.get(`${API_URL}/orders/topProducts`);
-    console.log('Top ordered products:', data.topProducts); // Log the top products
+   
     dispatch({
       type: GET_TOP_PRODUCTS_SUCCESS,
       payload: data.topProducts,
