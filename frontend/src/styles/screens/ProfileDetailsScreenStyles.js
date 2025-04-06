@@ -78,6 +78,19 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  input: {
+    borderWidth: 1,
+    borderColor: '#333',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#2A2A2A',
+    color: '#FFFFFF',
+    marginTop: 5,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
 });
 
 export default styles;
