@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { createProductReview, getProductById } from '../redux/actions/productAction';
-import { CREATE_REVIEW_RESET } from '../redux/constants';
+import { createProductReview, updateProductReview, getProductById } from '../redux/actions/productAction';
+import { CREATE_REVIEW_RESET, UPDATE_REVIEW_RESET } from '../redux/constants';
 
-const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId, hasReviewed }) => {
+const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId, hasReviewed, isEditMode = false }) => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [existingReview, setExistingReview] = useState(null);
@@ -58,16 +58,16 @@ const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId
   // Handle success and error states
   useEffect(() => {
     if (success) {
-      Alert.alert('Success', 'Review submitted successfully');
-      dispatch({ type: CREATE_REVIEW_RESET });
+      Alert.alert('Success', isEditMode ? 'Review updated successfully' : 'Review submitted successfully');
+      dispatch({ type: isEditMode ? UPDATE_REVIEW_RESET : CREATE_REVIEW_RESET });
       onClose();
     }
     
     if (error) {
-      Alert.alert('Error', error || 'Failed to submit review');
-      dispatch({ type: CREATE_REVIEW_RESET });
+      Alert.alert('Error', error || (isEditMode ? 'Failed to update review' : 'Failed to submit review'));
+      dispatch({ type: isEditMode ? UPDATE_REVIEW_RESET : CREATE_REVIEW_RESET });
     }
-  }, [success, error, dispatch, onClose]);
+  }, [success, error, dispatch, onClose, isEditMode]);
 
   const handleSubmit = () => {
     if (rating === 0) {
@@ -80,16 +80,22 @@ const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId
       return;
     }
     
-    dispatch(createProductReview(productId, {
+    const reviewData = {
       rating,
       comment,
       orderId,
       userId
-    }));
+    };
+    
+    if (isEditMode) {
+      dispatch(updateProductReview(productId, reviewData));
+    } else {
+      dispatch(createProductReview(productId, reviewData));
+    }
   };
 
   // Determine if we should be in view-only mode
-  const isViewMode = hasReviewed || (existingReview !== null);
+  const isViewMode = hasReviewed && !isEditMode;
 
   return (
     <Modal
@@ -102,7 +108,9 @@ const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId
         <View style={styles.modalView}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {isViewMode ? `Your Review of ${productName}` : `Review ${productName}`}
+              {isEditMode ? `Edit Review for ${productName}` : 
+               isViewMode ? `Your Review of ${productName}` : 
+               `Review ${productName}`}
             </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <AntDesign name="close" size={24} color="#FFFFFF" />
@@ -154,7 +162,9 @@ const ReviewModal = ({ visible, onClose, productId, productName, orderId, userId
               {loading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={styles.submitButtonText}>Submit Review</Text>
+                <Text style={styles.submitButtonText}>
+                  {isEditMode ? "Update Review" : "Submit Review"}
+                </Text>
               )}
             </TouchableOpacity>
           )}

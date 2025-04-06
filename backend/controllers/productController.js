@@ -183,6 +183,62 @@ export const createProductReview = async (req, res) => {
   }
 };
 
+// Update a product review
+export const updateProductReview = async (req, res) => {
+  try {
+    const { rating, comment, orderId, userId } = req.body;
+    const productId = req.params.id;
+
+    // Validate input
+    if (!rating || !comment || !orderId || !userId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please provide all required fields" 
+      });
+    }
+
+    // Find the product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Product not found" 
+      });
+    }
+
+    // Find the existing review
+    const reviewIndex = product.reviews.findIndex(
+      review => review.orderID.toString() === orderId && review.user.toString() === userId
+    );
+
+    if (reviewIndex === -1) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Review not found" 
+      });
+    }
+
+    // Update the review
+    product.reviews[reviewIndex].rating = Number(rating);
+    product.reviews[reviewIndex].comment = comment;
+
+    // Save the updated product
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Review updated successfully",
+      review: product.reviews[reviewIndex]
+    });
+  } catch (error) {
+    console.error("Error updating review:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
+
 export const getAdminStats = async (req, res) => {
   try {
     // Total Orders

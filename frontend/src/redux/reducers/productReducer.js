@@ -17,7 +17,11 @@ import {
     CREATE_REVIEW_REQUEST,
     CREATE_REVIEW_SUCCESS,
     CREATE_REVIEW_FAIL,
-    CREATE_REVIEW_RESET
+    CREATE_REVIEW_RESET,
+    UPDATE_REVIEW_REQUEST,
+    UPDATE_REVIEW_SUCCESS,
+    UPDATE_REVIEW_FAIL,
+    UPDATE_REVIEW_RESET
   } from "../constants";
   
   const initialState = {
@@ -70,12 +74,16 @@ import {
   export const productReviewReducer = (state = {}, action) => {
     switch (action.type) {
       case CREATE_REVIEW_REQUEST:
+      case UPDATE_REVIEW_REQUEST:
         return { loading: true };
       case CREATE_REVIEW_SUCCESS:
+      case UPDATE_REVIEW_SUCCESS:
         return { loading: false, success: true };
       case CREATE_REVIEW_FAIL:
+      case UPDATE_REVIEW_FAIL:
         return { loading: false, error: action.payload };
       case CREATE_REVIEW_RESET:
+      case UPDATE_REVIEW_RESET:
         return {};
       default:
         return state;

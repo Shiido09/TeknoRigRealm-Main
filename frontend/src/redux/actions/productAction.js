@@ -19,6 +19,9 @@ import {
   CREATE_REVIEW_REQUEST,
   CREATE_REVIEW_SUCCESS,
   CREATE_REVIEW_FAIL,
+  UPDATE_REVIEW_REQUEST,
+  UPDATE_REVIEW_SUCCESS,
+  UPDATE_REVIEW_FAIL,
 } from "../constants";
 
 // Get all products
@@ -101,6 +104,22 @@ export const createProductReview = (productId, reviewData) => async (dispatch) =
   } catch (error) {
     dispatch({ 
       type: CREATE_REVIEW_FAIL, 
+      payload: error.response?.data.message || error.message 
+    });
+  }
+};
+
+// Update a product review
+export const updateProductReview = (productId, reviewData) => async (dispatch) => {
+  try {
+    dispatch({ type: UPDATE_REVIEW_REQUEST });
+
+    const { data } = await axios.put(`${API_URL}/products/${productId}/reviews`, reviewData);
+
+    dispatch({ type: UPDATE_REVIEW_SUCCESS });
+  } catch (error) {
+    dispatch({ 
+      type: UPDATE_REVIEW_FAIL, 
       payload: error.response?.data.message || error.message 
     });
   }

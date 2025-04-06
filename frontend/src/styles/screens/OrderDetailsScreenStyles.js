@@ -178,8 +178,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 8, // Add margin to make room for review button
   },
+  reviewButtonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   reviewButton: {
     backgroundColor: '#2196F3',
+    borderRadius: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+    marginRight: 8,
+  },
+  editReviewButton: {
+    backgroundColor: '#FF9800',
     borderRadius: 4,
     paddingVertical: 4,
     paddingHorizontal: 8,

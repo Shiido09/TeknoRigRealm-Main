@@ -40,6 +40,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   // Track reviewed products
   const [reviewedProductIds, setReviewedProductIds] = useState([]);
 
@@ -165,8 +166,9 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   };
 
   // Handle opening review modal for a product
-  const handleReviewProduct = (product) => {
+  const handleReviewProduct = (product, edit = false) => {
     setSelectedProduct(product);
+    setIsEditMode(edit);
     setShowReviewModal(true);
     
     // Fetch the latest product details to get updated reviews
@@ -189,17 +191,29 @@ const OrderDetailsScreen = ({ route, navigation }) => {
         
         {/* Review button - only show for completed orders */}
         {order.orderStatus === 'Completed' && (
-          <TouchableOpacity 
-            style={[
-              styles.reviewButton,
-              hasUserReviewedProduct(item.product) && styles.viewReviewButton
-            ]}
-            onPress={() => handleReviewProduct(item.product)}
-          >
-            <Text style={styles.reviewButtonText}>
-              {hasUserReviewedProduct(item.product) ? 'View Review' : 'Write a Review'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.reviewButtonsContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.reviewButton,
+                hasUserReviewedProduct(item.product) && styles.viewReviewButton
+              ]}
+              onPress={() => handleReviewProduct(item.product)}
+            >
+              <Text style={styles.reviewButtonText}>
+                {hasUserReviewedProduct(item.product) ? 'View Review' : 'Write a Review'}
+              </Text>
+            </TouchableOpacity>
+            
+            {/* Edit button - only show for products that have been reviewed */}
+            {hasUserReviewedProduct(item.product) && (
+              <TouchableOpacity 
+                style={styles.editReviewButton}
+                onPress={() => handleReviewProduct(item.product, true)}
+              >
+                <Text style={styles.reviewButtonText}>Edit</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
       </View>
     </View>
@@ -375,12 +389,14 @@ const OrderDetailsScreen = ({ route, navigation }) => {
           onClose={() => {
             setShowReviewModal(false);
             setSelectedProduct(null);
+            setIsEditMode(false);
           }}
           productId={selectedProduct._id}
           productName={selectedProduct.product_name}
           orderId={orderId}
           userId={userId}
           hasReviewed={hasUserReviewedProduct(selectedProduct)}
+          isEditMode={isEditMode}
         />
       )}
     </SafeAreaView>
