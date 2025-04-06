@@ -15,6 +15,7 @@ import CartScreen from '../screens/CartScreen';
 import CheckoutDetailsScreen from '../screens/CheckoutDetailsScreen';
 import MyOrdersScreen from '../screens/MyOrdersScreen';
 import OrderDetailsScreen from '../screens/OrderDetailsScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 
 const Stack = createStackNavigator();
 
@@ -65,6 +66,11 @@ const AppNavigator = () => {
         <Stack.Screen name="Cart" component={CartScreen} />
         <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
         <Stack.Screen name="CheckoutDetails" component={CheckoutDetailsScreen} />
+        <Stack.Screen 
+          name="ChangePassword" 
+          component={ChangePasswordScreen} 
+          options={{ headerShown: false }}
+        />
         {/* Add other non-tab screens here */}
       </Stack.Navigator>
     </NavigationContainer>

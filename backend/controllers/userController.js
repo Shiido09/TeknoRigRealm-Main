@@ -123,12 +123,37 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { name, address, phoneNo } = req.body;
-
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
+
+    // Handle password update
+    if (req.body.updatePassword) {
+      const { currentPassword, newPassword } = req.body;
+      
+      // Check if current password is correct
+      const isPasswordValid = await bcryptjs.compare(currentPassword, user.password);
+      if (!isPasswordValid) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Current password is incorrect" 
+        });
+      }
+      
+      // Hash and update the new password
+      const hashedPassword = await bcryptjs.hash(newPassword, 10);
+      user.password = hashedPassword;
+      
+      await user.save();
+      return res.status(200).json({ 
+        success: true, 
+        message: "Password updated successfully" 
+      });
+    }
+
+    // Handle regular profile update
+    const { name, address, phoneNo } = req.body;
 
     let avatar = user.avatar;
     if (req.file) {
@@ -260,123 +285,3 @@ export const googleLogin = async (req, res) => {
     res.status(400).json({ success: false, message: "Invalid Google ID token" });
   }
 };
-
-// export const googleLogin = async (req, res) => {
-//   const { idToken } = req.body;
-  
-//   try {
-//     console.log("Received Google ID token:", idToken ? idToken.substring(0, 20) + "..." : "null");
-    
-//     // Verify the token with Google directly 
-//     const response = await fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${idToken}`);
-//     const tokenInfo = await response.json();
-    
-//     if (!response.ok || !tokenInfo.email) {
-//       console.error("Google token validation failed:", tokenInfo);
-//       return res.status(400).json({ success: false, message: "Invalid Google ID token" });
-//     }
-    
-//     const email = tokenInfo.email;
-//     const name = tokenInfo.name || tokenInfo.email.split('@')[0];
-//     const googleId = tokenInfo.sub; // Google's user ID
-//     const picture = tokenInfo.picture || null;
-    
-//     // Find user by email or create a new one in MongoDB
-//     let user = await User.findOne({ email });
-//     let firebaseUser;
-    
-//     // First check if user exists in Firebase Authentication
-//     try {
-//       firebaseUser = await auth.getUserByEmail(email);
-//       console.log("User found in Firebase Auth:", firebaseUser.uid);
-      
-//       // Update last sign-in time and provider data
-//       await auth.updateUser(firebaseUser.uid, {
-//         displayName: name,
-//         photoURL: picture,
-//         emailVerified: true,
-//       });
-      
-//       // Set custom claims for additional data
-//       await auth.setCustomUserClaims(firebaseUser.uid, { 
-//         lastSignInTime: new Date().toISOString(),
-//         provider: 'google',
-//         updatedAt: new Date().toISOString() 
-//       });
-      
-//     } catch (firebaseError) {
-//       if (firebaseError.code === 'auth/user-not-found') {
-//         // User doesn't exist in Firebase, create them
-//         try {
-//           // Create with more complete user data
-//           firebaseUser = await auth.createUser({
-//             email: email,
-//             emailVerified: true,
-//             displayName: name,
-//             photoURL: picture,
-//             disabled: false,
-//           });
-          
-//           // Set custom claims for additional metadata
-//           await auth.setCustomUserClaims(firebaseUser.uid, { 
-//             provider: 'google',
-//             createdAt: new Date().toISOString(),
-//             lastSignInTime: new Date().toISOString() 
-//           });
-          
-//           console.log("Created user in Firebase Auth:", firebaseUser.uid);
-//         } catch (createError) {
-//           console.error("Error creating Firebase user:", createError);
-//           // Continue even if Firebase user creation fails
-//         }
-//       } else {
-//         console.error("Firebase Auth error:", firebaseError);
-//         // Continue even if Firebase operation fails
-//       }
-//     }
-    
-//     const firebaseUid = firebaseUser ? firebaseUser.uid : googleId;
-    
-//     if (!user) {
-//       // Generate a random password
-//       const randomPassword = crypto.randomBytes(16).toString('hex');
-//       const hashedPassword = await bcryptjs.hash(randomPassword, 10);
-      
-//       // Create a new user in MongoDB
-//       user = new User({
-//         email,
-//         name: name,
-//         password: hashedPassword,
-//         firebaseUid: firebaseUid, // Store Firebase UID or Google ID
-//         phoneNo: 'N/A',
-//         address: 'N/A',
-//       });
-      
-//       await user.save();
-//     } else if (firebaseUser && user.firebaseUid !== firebaseUser.uid) {
-//       // Update the firebaseUid if it changed
-//       user.firebaseUid = firebaseUser.uid;
-//       await user.save();
-//     }
-    
-//     // Generate JWT token
-//     const token = generateToken(user._id);
-    
-//     // Return response
-//     res.status(200).json({
-//       _id: user._id,
-//       name: user.name,
-//       email: user.email,
-//       isAdmin: user.isAdmin,
-//       address: user.address,
-//       phoneNo: user.phoneNo,
-//       token: token,
-//       user: {
-//         _id: user._id
-//       }
-//     });
-//   } catch (error) {
-//     console.error("Error processing Google login:", error);
-//     res.status(400).json({ success: false, message: "Invalid Google ID token" });
-//   }
-// };

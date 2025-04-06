@@ -358,3 +358,47 @@ export const logout = async () => {
     throw error;
   }
 };
+
+/**
+ * Change user password
+ * @param {String} currentPassword - Current password
+ * @param {String} newPassword - New password
+ * @returns {Promise} Response from API
+ */
+export const changePassword = async (currentPassword, newPassword) => {
+  try {
+    const token = await getItem('token');
+    const userId = await getItem('userId');
+    
+    if (!token || !userId) {
+      throw new Error('User not authenticated');
+    }
+    
+    // Create password update data
+    const passwordData = {
+      currentPassword,
+      newPassword,
+      updatePassword: true // Flag to indicate this is a password update
+    };
+
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(passwordData),
+    });
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to change password');
+    }
+    
+    return data;
+  } catch (error) {
+    //console.error('Password change error:', error);
+    throw error;
+  }
+};
