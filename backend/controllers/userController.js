@@ -211,14 +211,6 @@ export const getUserProfile = async (req, res) => {
 // Logout user
 export const logoutUser = async (req, res) => {
   try {
-    // Since we're using JWT, actual token invalidation would require a token blacklist
-    // For a simple implementation, we'll just return a success response
-    // The frontend will handle removing the token from storage
-    
-    // If you want to implement a token blacklist in the future:
-    // 1. Create a blacklist collection in MongoDB
-    // 2. Add the token to that blacklist with an expiry date
-    
     res.status(200).json({ 
       success: true, 
       message: "Logged out successfully" 
@@ -252,13 +244,13 @@ export const googleLogin = async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) {
       // Generate a random password
-      const randomPassword = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = await bcryptjs.hash('12345678', 10);
 
       // Create a new user if not found
       user = new User({
         email,
         name: decodedToken.name || email.split('@')[0],
-        password: randomPassword,
+        password: hashedPassword,
         firebaseUid,
         phoneNo: 'N/A',
         address: 'N/A',
