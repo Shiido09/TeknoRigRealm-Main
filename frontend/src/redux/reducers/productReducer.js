@@ -14,6 +14,10 @@ import {
     DELETE_PRODUCT_REQUEST,
     DELETE_PRODUCT_SUCCESS,
     DELETE_PRODUCT_FAIL,
+    CREATE_REVIEW_REQUEST,
+    CREATE_REVIEW_SUCCESS,
+    CREATE_REVIEW_FAIL,
+    CREATE_REVIEW_RESET
   } from "../constants";
   
   const initialState = {
@@ -58,6 +62,21 @@ import {
       case DELETE_PRODUCT_FAIL:
         return { ...state, loading: false, error: action.payload };
   
+      default:
+        return state;
+    }
+  };
+
+  export const productReviewReducer = (state = {}, action) => {
+    switch (action.type) {
+      case CREATE_REVIEW_REQUEST:
+        return { loading: true };
+      case CREATE_REVIEW_SUCCESS:
+        return { loading: false, success: true };
+      case CREATE_REVIEW_FAIL:
+        return { loading: false, error: action.payload };
+      case CREATE_REVIEW_RESET:
+        return {};
       default:
         return state;
     }

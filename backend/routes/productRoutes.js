@@ -7,6 +7,7 @@ import {
   updateProduct,
   deleteProduct,
   getAdminStats,
+  createProductReview
 } from "../controllers/productController.js";
 
 const router = express.Router();
@@ -18,6 +19,6 @@ router.get("/adminStats", getAdminStats);
 router.get("/:id", getProductById);
 router.put("/:id", upload.array("product_images", 5), updateProduct);
 router.delete("/:id", deleteProduct);
-
+router.post("/:id/reviews", createProductReview);
 
 export default router;

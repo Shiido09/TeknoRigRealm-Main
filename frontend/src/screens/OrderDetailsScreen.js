@@ -12,7 +12,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { getOrderDetails, updateOrderStatus } from '../redux/actions/orderActions';
-import { ORDER_UPDATE_STATUS_RESET } from '../redux/constants/orderConstants'; // Make sure this constant exists
+import { getProductById } from '../redux/actions/productAction';
+import { ORDER_UPDATE_STATUS_RESET } from '../redux/constants/orderConstants';
+import { getItem } from '../services/authService';
+import ReviewModal from '../components/ReviewModal';
 import styles from '../styles/screens/OrderDetailsScreenStyles';
 
 const OrderDetailsScreen = ({ route, navigation }) => {
@@ -26,6 +29,21 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   // Get status update state from Redux
   const statusUpdate = useSelector(state => state.orderUpdateStatus || {});
   const { loading: updateLoading, success: updateSuccess, error: updateError } = statusUpdate;
+  
+  // State for review modal
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  // Fetch user ID on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getItem('userId');
+      setUserId(id);
+    };
+    
+    fetchUserId();
+  }, []);
 
   useEffect(() => {
     dispatch(getOrderDetails(orderId));
@@ -37,6 +55,27 @@ const OrderDetailsScreen = ({ route, navigation }) => {
       }
     };
   }, [dispatch, orderId]);
+
+  // Fetch product reviews for completed orders
+  useEffect(() => {
+    const fetchProductReviews = async () => {
+      if (order && order.orderStatus === 'Completed' && order.orderItems && order.orderItems.length > 0) {
+        for (const item of order.orderItems) {
+          if (item.product && item.product._id) {
+            await dispatch(getProductById(item.product._id));
+          }
+        }
+      }
+    };
+    
+    if (order && order.orderStatus === 'Completed') {
+      fetchProductReviews();
+    }
+  }, [order, dispatch]);
+
+  // Get product details from Redux store
+  const productState = useSelector(state => state.productState || {});
+  const { product } = productState;
 
   // Refresh order details when status is updated successfully
   useEffect(() => {
@@ -78,6 +117,34 @@ const OrderDetailsScreen = ({ route, navigation }) => {
     );
   };
 
+  // Add this new function to check if the user has already reviewed a product
+  const hasUserReviewedProduct = (product) => {
+    if (!product || !product._id || !userId) return false;
+    
+    // Check if this product is in our current complete product from state
+    if (productState.product && productState.product._id === product._id) {
+      const reviews = productState.product.reviews || [];
+      return reviews.some(review => 
+        review.user.toString() === userId && 
+        review.orderID.toString() === orderId
+      );
+    }
+    
+    // Fallback to check product from order items
+    if (!product.reviews || !Array.isArray(product.reviews)) return false;
+    
+    return product.reviews.some(review => 
+      review.user && review.user.toString() === userId && 
+      review.orderID && review.orderID.toString() === orderId
+    );
+  };
+
+  // Handle opening review modal for a product or viewing existing review
+  const handleReviewProduct = (product) => {
+    setSelectedProduct(product);
+    setShowReviewModal(true);
+  };
+
   const renderOrderItem = ({ item }) => (
     <View style={styles.productItem}>
       <Image 
@@ -91,6 +158,21 @@ const OrderDetailsScreen = ({ route, navigation }) => {
         <Text style={styles.productName}>{item.product?.product_name || 'Product Name Unavailable'}</Text>
         <Text style={styles.productPrice}>₱{item.product?.price ? item.product.price.toFixed(2) : '0.00'}</Text>
         <Text style={styles.productQuantity}>Quantity: {item.quantity || 0}</Text>
+        
+        {/* Review button - only show for completed orders */}
+        {order.orderStatus === 'Completed' && (
+          <TouchableOpacity 
+            style={[
+              styles.reviewButton,
+              hasUserReviewedProduct(item.product) && styles.viewReviewButton
+            ]}
+            onPress={() => handleReviewProduct(item.product)}
+          >
+            <Text style={styles.reviewButtonText}>
+              {hasUserReviewedProduct(item.product) ? 'View Review' : 'Write a Review'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -229,32 +311,48 @@ const OrderDetailsScreen = ({ route, navigation }) => {
         </View>
         
         {/* Order Summary */}
-              <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Order Summary</Text>
-        <View style={{backgroundColor: '#2A2A2A', borderRadius: 8, padding: 12}}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Items Total</Text>
-            <Text style={styles.summaryValue}>
-              ₱{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
-            </Text>
-          </View>
-          {order.Courier && order.Courier.shippingfee > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={{backgroundColor: '#2A2A2A', borderRadius: 8, padding: 12}}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Shipping Fee</Text>
+              <Text style={styles.summaryLabel}>Items Total</Text>
               <Text style={styles.summaryValue}>
-                ₱{order.Courier.shippingfee ? order.Courier.shippingfee.toFixed(2) : '0.00'}
+                ₱{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
               </Text>
             </View>
-          )}
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>
-              ₱{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
-            </Text>
+            {order.Courier && order.Courier.shippingfee > 0 && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Shipping Fee</Text>
+                <Text style={styles.summaryValue}>
+                  ₱{order.Courier.shippingfee ? order.Courier.shippingfee.toFixed(2) : '0.00'}
+                </Text>
+              </View>
+            )}
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalValue}>
+                ₱{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
       </ScrollView>
+      
+      {/* Review Modal - Pass hasReviewed flag to the modal */}
+      {selectedProduct && product && (
+        <ReviewModal
+          visible={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setSelectedProduct(null);
+          }}
+          productId={selectedProduct._id}
+          productName={selectedProduct.product_name}
+          orderId={orderId}
+          userId={userId}
+          hasReviewed={hasUserReviewedProduct(product._id === selectedProduct._id ? product : selectedProduct)}
+        />
+      )}
     </SafeAreaView>
   );
 };

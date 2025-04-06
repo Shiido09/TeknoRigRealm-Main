@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { productReducer } from "./reducers/productReducer";
+import { productReducer, productReviewReducer } from "./reducers/productReducer";
 import { 
   orderCreateReducer, 
   orderDetailsReducer, 
@@ -14,6 +14,7 @@ import { adminUsersReducer } from './reducers/userReducers';
 const store = configureStore({
   reducer: {
     productState: productReducer,
+    productReview: productReviewReducer,
     orderCreate: orderCreateReducer,
     orderDetails: orderDetailsReducer,
     orderListMy: orderListMyReducer,

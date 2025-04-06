@@ -114,6 +114,74 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+// Create a new product review
+export const createProductReview = async (req, res) => {
+  try {
+    const { rating, comment, orderId, userId } = req.body;
+    const productId = req.params.id;
+
+    // Validate input
+    if (!rating || !comment || !orderId || !userId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Please provide all required fields" 
+      });
+    }
+
+    // Find the product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Product not found" 
+      });
+    }
+
+    // Check if user has already reviewed this product for this order
+    const alreadyReviewed = product.reviews.find(
+      review => review.orderID.toString() === orderId && review.user.toString() === userId
+    );
+
+    if (alreadyReviewed) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "You have already reviewed this product for this order" 
+      });
+    }
+
+    // Create the review object
+    const review = {
+      orderID: orderId,
+      user: userId,
+      rating: Number(rating),
+      comment
+    };
+
+    // Add review to the product
+    product.reviews.push(review);
+    
+    // Update number of reviews
+    product.numOfReviews = product.reviews.length;
+    
+    // Recalculate product rating if needed
+    // This is optional but could be added to calculate average rating
+
+    // Save the product with the new review
+    await product.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Review added successfully",
+      review
+    });
+  } catch (error) {
+    console.error("Error creating review:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
+  }
+};
 
 export const getAdminStats = async (req, res) => {
   try {

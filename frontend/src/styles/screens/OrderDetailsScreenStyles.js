@@ -176,6 +176,22 @@ const styles = StyleSheet.create({
   productQuantity: {
     color: '#AAAAAA',
     fontSize: 14,
+    marginBottom: 8, // Add margin to make room for review button
+  },
+  reviewButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    alignSelf: 'flex-start',
+  },
+  viewReviewButton: {
+    backgroundColor: '#4CAF50', // Different color for view review button
+  },
+  reviewButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   summaryRow: {
     flexDirection: 'row',

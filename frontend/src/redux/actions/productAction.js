@@ -16,6 +16,9 @@ import {
   DELETE_PRODUCT_REQUEST,
   DELETE_PRODUCT_SUCCESS,
   DELETE_PRODUCT_FAIL,
+  CREATE_REVIEW_REQUEST,
+  CREATE_REVIEW_SUCCESS,
+  CREATE_REVIEW_FAIL,
 } from "../constants";
 
 // Get all products
@@ -84,5 +87,21 @@ export const deleteProduct = (id) => async (dispatch) => {
     dispatch({ type: DELETE_PRODUCT_SUCCESS, payload: id });
   } catch (error) {
     dispatch({ type: DELETE_PRODUCT_FAIL, payload: error.response?.data.message || error.message });
+  }
+};
+
+// Create a product review
+export const createProductReview = (productId, reviewData) => async (dispatch) => {
+  try {
+    dispatch({ type: CREATE_REVIEW_REQUEST });
+
+    const { data } = await axios.post(`${API_URL}/products/${productId}/reviews`, reviewData);
+
+    dispatch({ type: CREATE_REVIEW_SUCCESS });
+  } catch (error) {
+    dispatch({ 
+      type: CREATE_REVIEW_FAIL, 
+      payload: error.response?.data.message || error.message 
+    });
   }
 };
