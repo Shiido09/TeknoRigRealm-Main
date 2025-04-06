@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { API_URL } from '../config/apiConfig';
 import { getOrderDetails, updateOrderStatus } from '../redux/actions/orderActions';
 import { getProductById } from '../redux/actions/productAction';
 import { ORDER_UPDATE_STATUS_RESET } from '../redux/constants/orderConstants';
@@ -30,10 +32,16 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   const statusUpdate = useSelector(state => state.orderUpdateStatus || {});
   const { loading: updateLoading, success: updateSuccess, error: updateError } = statusUpdate;
   
+  // Get product review state
+  const productReview = useSelector(state => state.productReview || {});
+  const { success: reviewSuccess } = productReview;
+  
   // State for review modal
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [userId, setUserId] = useState(null);
+  // Track reviewed products
+  const [reviewedProductIds, setReviewedProductIds] = useState([]);
 
   // Fetch user ID on component mount
   useEffect(() => {
@@ -45,6 +53,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
     fetchUserId();
   }, []);
 
+  // Fetch order details when component mounts
   useEffect(() => {
     dispatch(getOrderDetails(orderId));
     
@@ -59,23 +68,55 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   // Fetch product reviews for completed orders
   useEffect(() => {
     const fetchProductReviews = async () => {
-      if (order && order.orderStatus === 'Completed' && order.orderItems && order.orderItems.length > 0) {
+      if (order && order.orderStatus === 'Completed' && order.orderItems && order.orderItems.length > 0 && userId) {
+        const reviewedIds = [];
+        
         for (const item of order.orderItems) {
           if (item.product && item.product._id) {
-            await dispatch(getProductById(item.product._id));
+            try {
+              // Fetch the product details
+              const response = await axios.get(`${API_URL}/products/${item.product._id}`);
+              const productDetails = response.data.product;
+              
+              // Check if user has reviewed this product for this order
+              if (productDetails && productDetails.reviews) {
+                const hasReview = productDetails.reviews.some(review => 
+                  review.user && review.user.toString() === userId && 
+                  review.orderID && review.orderID.toString() === orderId
+                );
+                
+                if (hasReview) {
+                  reviewedIds.push(item.product._id);
+                }
+              }
+            } catch (err) {
+              console.error(`Error fetching product details: ${err}`);
+            }
           }
         }
+        
+        // Update state with all reviewed product IDs
+        setReviewedProductIds(reviewedIds);
       }
     };
     
-    if (order && order.orderStatus === 'Completed') {
+    if (order && order.orderStatus === 'Completed' && userId) {
       fetchProductReviews();
     }
-  }, [order, dispatch]);
+  }, [order, userId, orderId, reviewSuccess]);
 
   // Get product details from Redux store
   const productState = useSelector(state => state.productState || {});
   const { product } = productState;
+
+  // When a review is submitted successfully, update the reviewed products list
+  useEffect(() => {
+    if (reviewSuccess && selectedProduct && selectedProduct._id) {
+      if (!reviewedProductIds.includes(selectedProduct._id)) {
+        setReviewedProductIds(prev => [...prev, selectedProduct._id]);
+      }
+    }
+  }, [reviewSuccess, selectedProduct]);
 
   // Refresh order details when status is updated successfully
   useEffect(() => {
@@ -117,32 +158,19 @@ const OrderDetailsScreen = ({ route, navigation }) => {
     );
   };
 
-  // Add this new function to check if the user has already reviewed a product
+  // Check if a product has been reviewed
   const hasUserReviewedProduct = (product) => {
-    if (!product || !product._id || !userId) return false;
-    
-    // Check if this product is in our current complete product from state
-    if (productState.product && productState.product._id === product._id) {
-      const reviews = productState.product.reviews || [];
-      return reviews.some(review => 
-        review.user.toString() === userId && 
-        review.orderID.toString() === orderId
-      );
-    }
-    
-    // Fallback to check product from order items
-    if (!product.reviews || !Array.isArray(product.reviews)) return false;
-    
-    return product.reviews.some(review => 
-      review.user && review.user.toString() === userId && 
-      review.orderID && review.orderID.toString() === orderId
-    );
+    if (!product || !product._id) return false;
+    return reviewedProductIds.includes(product._id);
   };
 
-  // Handle opening review modal for a product or viewing existing review
+  // Handle opening review modal for a product
   const handleReviewProduct = (product) => {
     setSelectedProduct(product);
     setShowReviewModal(true);
+    
+    // Fetch the latest product details to get updated reviews
+    dispatch(getProductById(product._id));
   };
 
   const renderOrderItem = ({ item }) => (
@@ -281,23 +309,23 @@ const OrderDetailsScreen = ({ route, navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Shipping Address</Text>
           <View style={styles.addressContainer}>
-          <Text style={styles.addressName}>
+            <Text style={styles.addressName}>
               {order.user?.name || 'Customer'}
-              </Text>
-              <Text style={styles.addressLine}>
+            </Text>
+            <Text style={styles.addressLine}>
               {order.shippingInfo?.address || order.shippingAddress?.address || 'No address provided'}
-          </Text>
-          <Text style={styles.phoneNumber}>
-            Phone: {order.shippingInfo?.phoneNo || order.shippingAddress?.phoneNumber || 'N/A'}
-          </Text>
+            </Text>
+            <Text style={styles.phoneNumber}>
+              Phone: {order.shippingInfo?.phoneNo || order.shippingAddress?.phoneNumber || 'N/A'}
+            </Text>
+          </View>
         </View>
-      </View>
         
-      {/* Payment Method */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Payment Method</Text>
-        <Text style={styles.sectionContent}>{order.PaymentMethod}</Text>
-      </View>
+        {/* Payment Method */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <Text style={styles.sectionContent}>{order.PaymentMethod}</Text>
+        </View>
         
         {/* Order Items */}
         <View style={styles.section}>
@@ -320,6 +348,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 ₱{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
               </Text>
             </View>
+            
             {order.Courier && order.Courier.shippingfee > 0 && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Shipping Fee</Text>
@@ -328,6 +357,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
                 </Text>
               </View>
             )}
+            
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>
@@ -338,8 +368,8 @@ const OrderDetailsScreen = ({ route, navigation }) => {
         </View>
       </ScrollView>
       
-      {/* Review Modal - Pass hasReviewed flag to the modal */}
-      {selectedProduct && product && (
+      {/* Review Modal */}
+      {selectedProduct && (
         <ReviewModal
           visible={showReviewModal}
           onClose={() => {
@@ -350,7 +380,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
           productName={selectedProduct.product_name}
           orderId={orderId}
           userId={userId}
-          hasReviewed={hasUserReviewedProduct(product._id === selectedProduct._id ? product : selectedProduct)}
+          hasReviewed={hasUserReviewedProduct(selectedProduct)}
         />
       )}
     </SafeAreaView>
