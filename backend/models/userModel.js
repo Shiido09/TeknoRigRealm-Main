@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
                 required: false,
             },
         },
+        pushToken: {
+            type: String, // Field to store Expo push token
+            required: false,
+        },
+        
     },
     { timestamps: true }
 );

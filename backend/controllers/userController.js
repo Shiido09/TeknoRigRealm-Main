@@ -261,6 +261,49 @@ export const googleLogin = async (req, res) => {
   }
 };
 
+export const updatePushToken = async (req, res) => {
+  try {
+    const { userId, pushToken } = req.body;
+
+    if (!userId || !pushToken) {
+      return res.status(400).json({
+        success: false,
+        message: "User ID and push token are required.",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    // Check if the user is an admin
+    if (user.isAdmin) {
+      return res.status(400).json({
+        success: false,
+        message: "Push tokens are not allowed for admin accounts.",
+      });
+    }
+
+    // Save the push token for regular users
+    user.pushToken = pushToken;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Push token updated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 // export const googleLogin = async (req, res) => {
 //   const { idToken } = req.body;
   
