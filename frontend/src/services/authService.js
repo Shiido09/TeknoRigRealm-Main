@@ -151,7 +151,7 @@ export const login = async (credentials) => {
 
     return data;
   } catch (error) {
-    console.error('Login error:', error);
+    //console.error('Login error:', error);
     throw error;
   }
 };

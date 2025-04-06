@@ -6,11 +6,13 @@ import {
   TouchableOpacity, 
   ActivityIndicator,
   Image,
-  FlatList
+  FlatList,
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
-import { getOrderDetails } from '../redux/actions/orderActions';
+import { getOrderDetails, updateOrderStatus } from '../redux/actions/orderActions';
+import { ORDER_UPDATE_STATUS_RESET } from '../redux/constants/orderConstants'; // Make sure this constant exists
 import styles from '../styles/screens/OrderDetailsScreenStyles';
 
 const OrderDetailsScreen = ({ route, navigation }) => {
@@ -20,17 +22,61 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   // Get order details from Redux store
   const orderDetails = useSelector(state => state.orderDetails);
   const { loading, error, order } = orderDetails;
+  
+  // Get status update state from Redux
+  const statusUpdate = useSelector(state => state.orderUpdateStatus || {});
+  const { loading: updateLoading, success: updateSuccess, error: updateError } = statusUpdate;
 
   useEffect(() => {
     dispatch(getOrderDetails(orderId));
+    
+    // Clean up when component unmounts
+    return () => {
+      if (updateSuccess) {
+        dispatch({ type: ORDER_UPDATE_STATUS_RESET });
+      }
+    };
   }, [dispatch, orderId]);
 
-  // Add this debugging useEffect here
+  // Refresh order details when status is updated successfully
   useEffect(() => {
-    if (order) {
-      //success na to safe na
+    if (updateSuccess) {
+      dispatch(getOrderDetails(orderId));
+      // Show success message
+      Alert.alert(
+        "Success",
+        "Order status updated successfully",
+        [{ text: "OK" }]
+      );
+      // Reset the update status
+      dispatch({ type: ORDER_UPDATE_STATUS_RESET });
     }
-  }, [order]);
+    
+    if (updateError) {
+      Alert.alert(
+        "Error",
+        updateError || "Failed to update order status",
+        [{ text: "OK" }]
+      );
+    }
+  }, [updateSuccess, updateError, dispatch, orderId]);
+
+  // Handle marking order as completed
+  const handleMarkAsCompleted = () => {
+    Alert.alert(
+      "Confirm Action",
+      "Are you sure you want to mark this order as completed?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Yes, Complete", 
+          onPress: () => {
+            dispatch(updateOrderStatus(orderId, "Completed"));
+          }
+        }
+      ]
+    );
+  };
 
   const renderOrderItem = ({ item }) => (
     <View style={styles.productItem}>
@@ -119,6 +165,21 @@ const OrderDetailsScreen = ({ route, navigation }) => {
             {order.orderStatus}
           </Text>
         </View>
+        
+        {/* Mark as Completed Button - Only show for "To Deliver" orders */}
+        {order.orderStatus === 'To Deliver' && (
+          <TouchableOpacity 
+            style={styles.completeButton}
+            onPress={handleMarkAsCompleted}
+            disabled={updateLoading}
+          >
+            {updateLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={styles.completeButtonText}>Mark as Completed</Text>
+            )}
+          </TouchableOpacity>
+        )}
         
         {/* Order Date and Time */}
         <View style={styles.section}>

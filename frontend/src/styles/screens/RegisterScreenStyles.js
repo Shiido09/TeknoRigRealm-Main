@@ -156,6 +156,17 @@ export const styles = StyleSheet.create({
     height: 80,
     textAlignVertical: 'top',
   },
+  inputError: {
+    borderColor: '#FF5252',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: '#FF5252',
+    fontSize: 12,
+    marginTop: -10,
+    marginBottom: 10,
+    marginLeft: 5,
+  },
   registerButton: {
     backgroundColor: '#4CAF50',
     borderRadius: 8,
