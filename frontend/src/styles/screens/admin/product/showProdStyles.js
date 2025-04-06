@@ -111,6 +111,12 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 10,
     },
+    productDiscount: {
+        fontSize: 14,
+        color: '#FF5252', // Red for discounts
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
 });
 
 export default styles;

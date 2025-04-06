@@ -22,6 +22,10 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Please add a price'], // Custom error message
     },
+    discount: {
+      type: Number, 
+      default: 0, 
+    },
     stocks: {
       type: Number,
       required: true,

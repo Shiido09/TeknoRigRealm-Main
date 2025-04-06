@@ -21,7 +21,7 @@ const CATEGORIES = [
 
 const EditProductScreen = ({ navigation, route }) => {
     const { product } = route.params;
-    
+
     const dispatch = useDispatch();
 
     const { loading, error, success } = useSelector((state) => state.productState);
@@ -32,6 +32,7 @@ const EditProductScreen = ({ navigation, route }) => {
     const [description, setDescription] = useState(product.description);
     const [category, setCategory] = useState(product.category);
     const [images, setImages] = useState(product.product_images || []);
+    const [discount, setDiscount] = useState(product.discount.toString()); // Add discount state
 
     useEffect(() => {
         if (success) {
@@ -48,20 +49,20 @@ const EditProductScreen = ({ navigation, route }) => {
                 Alert.alert('Permission Denied', 'We need access to your gallery to upload images.');
                 return;
             }
-    
+
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
                 quality: 1,
             });
-    
+
             if (result.canceled) {
                 return;
             }
-    
+
             if (result.assets && result.assets.length > 0) {
                 const selectedImage = result.assets[0].uri;
-    
+
                 // Replace original image with the newly selected one
                 setImages([{ uri: selectedImage }]);
             } else {
@@ -71,7 +72,7 @@ const EditProductScreen = ({ navigation, route }) => {
             Alert.alert('Error', 'Something went wrong while picking the image.');
         }
     };
-    
+
 
     const handleUpdateProduct = () => {
         if (!productName || !price || !stocks || !description || !category) {
@@ -93,6 +94,7 @@ const EditProductScreen = ({ navigation, route }) => {
                         const formData = new FormData();
                         formData.append('product_name', productName);
                         formData.append('price', price);
+                        formData.append('discount', discount);
                         formData.append('stocks', stocks);
                         formData.append('description', description);
                         formData.append('category', category);
@@ -144,7 +146,17 @@ const EditProductScreen = ({ navigation, route }) => {
                     <Text style={styles.inputLabel}>Price</Text>
                     <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
                 </View>
-
+                <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Discount (%)</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter discount percentage"
+                        placeholderTextColor="#666666"
+                        value={discount}
+                        onChangeText={setDiscount}
+                        keyboardType="numeric"
+                    />
+                </View>
                 <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Stock Quantity</Text>
                     <TextInput style={styles.input} value={stocks} onChangeText={setStocks} keyboardType="numeric" />

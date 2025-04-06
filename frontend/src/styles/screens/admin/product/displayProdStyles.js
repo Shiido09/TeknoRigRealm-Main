@@ -117,26 +117,31 @@ const styles = StyleSheet.create({
     },
     filterChip: {
         paddingHorizontal: 10,
-        paddingVertical: 4,   
-        borderRadius: 12,     
+        paddingVertical: 4,
+        borderRadius: 12,
         marginRight: 8,
         backgroundColor: '#2A2A2A',
-        height: 28,        
-        justifyContent: 'center', 
+        height: 28,
+        justifyContent: 'center',
     },
     filterChipActive: {
         backgroundColor: '#4CAF50',
     },
     filterText: {
         color: '#FFFFFF',
-        fontSize: 11,       
-        lineHeight: 16,    
+        fontSize: 11,
+        lineHeight: 16,
     },
     filterTextActive: {
         color: '#FFFFFF',
         fontWeight: 'bold',
     },
-    
+    productDiscount: {
+        fontSize: 14,
+        color: '#FF5252', // Red for discounts
+        fontWeight: 'bold',
+        marginBottom: 4,
+    },
 });
 
 export default styles;
