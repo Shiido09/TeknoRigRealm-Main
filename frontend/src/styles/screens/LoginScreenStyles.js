@@ -46,6 +46,17 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 15,
   },
+  inputError: {
+    borderColor: '#FF5252',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: '#FF5252',
+    fontSize: 12,
+    marginTop: -10,
+    marginBottom: 10,
+    marginLeft: 5,
+  },
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 20,

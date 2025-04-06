@@ -78,6 +78,102 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  input: {
+    borderWidth: 1,
+    borderColor: '#333',
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: '#2A2A2A',
+    color: '#FFFFFF',
+    marginTop: 5,
+  },
+  inputError: {
+    borderColor: '#FF5252',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: '#FF5252',
+    fontSize: 12,
+    marginBottom: 10,
+    marginLeft: 5,
+  },
+  disabledButton: {
+    opacity: 0.7,
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  camera: {
+    flex: 1,
+  },
+  cameraControls: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  flipButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
+  },
+  flipButtonText: {
+    fontSize: 18,
+    color: 'white',
+  },
+  captureButton: {
+    alignSelf: 'flex-end',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  captureButtonInner: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: 'white',
+  },
+  cancelButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
+  },
+  cancelButtonText: {
+    fontSize: 18,
+    color: 'white',
+  },
+  cameraPermissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#121212',
+    padding: 20,
+  },
+  cameraPermissionText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  cameraPermissionButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  cameraPermissionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
 
 export default styles;

@@ -63,6 +63,9 @@ const ProductsScreen = ({ navigation }) => {
   useEffect(() => {
     let filtered = products;
 
+    // Filter out products with zero stock
+    filtered = filtered.filter(product => product.stocks > 0);
+
     if (selectedCategory !== 'All') {
       filtered = filtered.filter(product => product.category === selectedCategory);
     }

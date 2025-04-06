@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native'; // Add this import
 import { getItem } from '../services/authService';
 import { listMyOrders } from '../redux/actions/orderActions';
 import styles from '../styles/screens/MyOrdersScreenStyles';
@@ -27,26 +28,28 @@ const MyOrdersScreen = ({ navigation }) => {
   // Order status tabs
   const orderTabs = ['All', 'To Ship', 'To Deliver', 'Completed'];
 
-  // Fetch orders when component mounts
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        // Check if user is logged in
-        const token = await getItem('token');
-        
-        if (!token) {
-          Alert.alert('Error', 'You are not logged in');
-          return;
+  // Fetch orders whenever screen comes into focus using useFocusEffect
+  useFocusEffect(
+    useCallback(() => {
+      const fetchOrders = async () => {
+        try {
+          // Check if user is logged in
+          const token = await getItem('token');
+          
+          if (!token) {
+            Alert.alert('Error', 'You are not logged in');
+            return;
+          }
+          
+          dispatch(listMyOrders());
+        } catch (err) {
+          console.error('Error:', err);
         }
-        
-        dispatch(listMyOrders());
-      } catch (err) {
-        console.error('Error:', err);
-      }
-    };
+      };
 
-    fetchOrders();
-  }, [dispatch]);
+      fetchOrders();
+    }, [dispatch])
+  );
 
   // Filter orders based on active tab - using useCallback to optimize performance
   const getFilteredOrders = useCallback(() => {

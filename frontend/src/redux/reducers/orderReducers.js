@@ -16,6 +16,7 @@ import {
   ORDER_UPDATE_STATUS_REQUEST,
   ORDER_UPDATE_STATUS_SUCCESS,
   ORDER_UPDATE_STATUS_FAIL,
+  ORDER_UPDATE_STATUS_RESET,
   GET_TOP_PRODUCTS_REQUEST,
   GET_TOP_PRODUCTS_SUCCESS,
   GET_TOP_PRODUCTS_FAIL,
@@ -29,6 +30,8 @@ export const orderUpdateStatusReducer = (state = {}, action) => {
       return { loading: false, success: true, order: action.payload };
     case ORDER_UPDATE_STATUS_FAIL:
       return { loading: false, error: action.payload };
+    case ORDER_UPDATE_STATUS_RESET:
+      return {}; // Reset to initial state
     default:
       return state;
   }

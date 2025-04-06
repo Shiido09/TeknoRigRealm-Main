@@ -151,7 +151,7 @@ export const login = async (credentials) => {
 
     return data;
   } catch (error) {
-    console.error('Login error:', error);
+    //console.error('Login error:', error);
     throw error;
   }
 };
@@ -272,10 +272,53 @@ export const updateUser = async (userId, userData, avatarUri) => {
       throw new Error(data.message || 'Failed to update user');
     }
 
+    // Store updated user data for consistent access
+    await setItem('userData', JSON.stringify(data.user));
+    
+    // Set a timestamp to indicate fresh data
+    await setItem('userDataTimestamp', Date.now().toString());
+
     return data.user;
   } catch (error) {
     console.error('Error updating user:', error);
     throw error;
+  }
+};
+
+/**
+ * Get current user data from local storage or fetch from API
+ * @param {Boolean} forceRefresh - Force fetch from server
+ * @returns {Promise} User data
+ */
+export const getCurrentUser = async (forceRefresh = false) => {
+  try {
+    const userId = await getItem('userId');
+    if (!userId) return null;
+    
+    // Get cached timestamp and data
+    const timestamp = await getItem('userDataTimestamp');
+    const now = Date.now();
+    const userData = await getItem('userData');
+    
+    // Check if we have fresh data (less than 1 minute old)
+    const isFreshData = timestamp && (now - parseInt(timestamp)) < 60000;
+    
+    // Return cached data if fresh and not forcing refresh
+    if (userData && isFreshData && !forceRefresh) {
+      return JSON.parse(userData);
+    }
+    
+    // Otherwise fetch fresh data
+    const user = await getUserById(userId);
+    
+    // Update the cache
+    await setItem('userData', JSON.stringify(user));
+    await setItem('userDataTimestamp', now.toString());
+    
+    return user;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
   }
 };
 

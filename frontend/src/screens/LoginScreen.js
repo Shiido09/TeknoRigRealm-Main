@@ -16,14 +16,42 @@ import { login, setItem, googleLogin } from '../services/authService';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
+import { isValidEmail, validateRequired } from '../utils/validation';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let tempErrors = {};
+    let isValid = true;
+    
+    // Validate email
+    if (!email) {
+      tempErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!isValidEmail(email)) {
+      tempErrors.email = 'Please enter a valid email address';
+      isValid = false;
+    }
+    
+    // Validate password
+    if (!password) {
+      tempErrors.password = 'Password is required';
+      isValid = false;
+    }
+    
+    setErrors(tempErrors);
+    return isValid;
+  };
 
   const handleLogin = async () => {
+    // Validate form first
+    if (!validateForm()) return;
+    
     try {
       setIsLoading(true);
       const data = await login({ email, password }); // Call the login function
@@ -47,46 +75,6 @@ const LoginScreen = ({ navigation }) => {
       setIsLoading(false);
     }
   };
-
-  // const handleGoogleLogin = async () => {
-  //   try {
-  //     setGoogleLoading(true);
-      
-  //     // Sign in with Google using React Native Google Sign In
-  //     await GoogleSignin.hasPlayServices();
-  //     const userInfo = await GoogleSignin.signIn();
-      
-  //     console.log('Google Sign-In Response:', JSON.stringify(userInfo));
-      
-  //     // FIXED: Access idToken from the correct location in the response
-  //     const idToken = userInfo.idToken || (userInfo.data && userInfo.data.idToken);
-  //     console.log('ID Token:', idToken);
-      
-  //     if (!idToken) {
-  //       throw new Error("ID token not found in Google response");
-  //     }
-      
-  //     // Send the ID token to your backend
-  //     const data = await googleLogin(idToken);
-      
-  //     // Store token and user ID
-  //     await setItem('token', data.token);
-  //     await setItem('userId', data.user._id);
-  
-  //     Alert.alert('Login Successful', 'Welcome back!');
-  
-  //     // Navigate based on user role
-  //     if (data.user.isAdmin) {
-  //       navigation.navigate('Admin');
-  //     } else {
-  //       navigation.navigate('Main');
-  //     }
-  //   } catch (error) {
-  //     // ...existing error handling...
-  //   } finally {
-  //     setGoogleLoading(false);
-  //   }
-  // };
 
   const handleGoogleLogin = async () => {
     try {
@@ -156,24 +144,36 @@ const LoginScreen = ({ navigation }) => {
           <View style={styles.formContainer}>
             <Text style={styles.formLabel}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.email && styles.inputError]}
               placeholder="Enter your email"
               placeholderTextColor="#888888"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) {
+                  setErrors({...errors, email: null});
+                }
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             
             <Text style={styles.formLabel}>Password</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.password && styles.inputError]}
               placeholder="Enter your password"
               placeholderTextColor="#888888"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) {
+                  setErrors({...errors, password: null});
+                }
+              }}
               secureTextEntry
             />
+            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             
             <TouchableOpacity style={styles.forgotPassword}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
