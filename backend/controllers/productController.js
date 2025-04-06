@@ -290,3 +290,22 @@ export const getAdminStats = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to fetch admin stats' });
   }
 };
+
+export const getAllReviews = async (req, res) => {
+  try {
+    // Aggregate all reviews from all products
+    const products = await Product.find().populate('reviews.user', 'name email'); // Populate user details
+    const allReviews = products.flatMap((product) =>
+      product.reviews.map((review) => ({
+        productId: product._id,
+        productName: product.product_name,
+        ...review._doc, // Spread review details
+      }))
+    );
+    console.log('All Reviews:', allReviews);
+    res.status(200).json({ success: true, reviews: allReviews });
+  } catch (error) {
+    console.error('Error fetching all reviews:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

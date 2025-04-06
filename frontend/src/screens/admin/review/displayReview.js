@@ -1,59 +1,17 @@
-import React from 'react';
-import { View, Text, FlatList, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllReviews } from '../../../redux/actions/productAction';
 import { Ionicons } from '@expo/vector-icons';
 import styles from '../../../styles/screens/admin/review/displayReviewStyle';
 
-// Sample review data
-const sampleReviews = [
-  {
-    _id: '1',
-    user: {
-      name: 'John Doe',
-      _id: 'u1'
-    },
-    orderID: 'ORD001',
-    rating: 5,
-    comment: 'Excellent gaming PC! The performance is incredible and the build quality is top-notch.',
-    createdAt: '2025-03-28T10:00:00Z'
-  },
-  {
-    _id: '2',
-    user: {
-      name: 'Jane Smith',
-      _id: 'u2'
-    },
-    orderID: 'ORD002',
-    rating: 4,
-    comment: 'Great laptop, but the battery life could be better. Otherwise, very satisfied with the purchase.',
-    createdAt: '2025-03-27T15:30:00Z'
-  },
-  {
-    _id: '3',
-    user: {
-      name: 'Mike Johnson',
-      _id: 'u3'
-    },
-    orderID: 'ORD003',
-    rating: 5,
-    comment: 'The mechanical keyboard is amazing! Perfect for both gaming and typing.',
-    createdAt: '2025-03-26T09:15:00Z'
-  },
-  {
-    _id: '4',
-    user: {
-      name: 'Sarah Wilson',
-      _id: 'u4'
-    },
-    orderID: 'ORD004',
-    rating: 3,
-    comment: 'Decent monitor, but the colors needed some calibration out of the box.',
-    createdAt: '2025-03-25T14:20:00Z'
-  }
-];
-
 const DisplayReviews = () => {
-  // Use sampleReviews instead of props
-  const reviews = sampleReviews;
+  const dispatch = useDispatch();
+  const { reviews, loading, error } = useSelector((state) => state.allReviews || {});
+
+  useEffect(() => {
+    dispatch(getAllReviews()); // Fetch all reviews
+  }, [dispatch]);
 
   const renderStars = (rating) => {
     return (
@@ -74,19 +32,32 @@ const DisplayReviews = () => {
     <View style={styles.reviewCard}>
       <View style={styles.reviewHeader}>
         <View style={styles.userInfo}>
-          <Text style={styles.username}>{item.user.name}</Text>
-          <Text style={styles.orderNumber}>Order: #{item.orderID}</Text>
+          <Text style={styles.productName}>Product: {item.productName || 'Unknown Product'}</Text>
+          <Text style={styles.username}>{item.user?.name || 'Anonymous'}</Text>
+          <Text style={styles.orderNumber}>Order: #{item.orderID || 'N/A'}</Text>
         </View>
         {renderStars(item.rating)}
       </View>
-      <Text style={styles.reviewText}>{item.comment}</Text>
-      <View style={styles.reviewFooter}>
-        <Text style={styles.dateText}>
-          {new Date(item.createdAt).toLocaleDateString()}
-        </Text>
-      </View>
+      <Text style={styles.reviewText}>{item.comment}</Text> {/* Ensure comment is wrapped in <Text> */}
+
     </View>
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -96,6 +67,7 @@ const DisplayReviews = () => {
         renderItem={renderReviewItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.reviewsList}
+        ListEmptyComponent={<Text style={styles.emptyText}>No reviews available.</Text>}
       />
     </View>
   );

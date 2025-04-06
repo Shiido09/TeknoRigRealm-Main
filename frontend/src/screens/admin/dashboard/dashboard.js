@@ -174,7 +174,7 @@ const AdminDashboard = ({ navigation }) => {
     { title: 'Manage Orders', icon: 'list', screen: 'displayOrder' },
     { title: 'Manage Products', icon: 'inventory', screen: 'displayProduct' },
     { title: 'Manage Users', icon: 'people', screen: 'displayUser' },
-    { title: 'Manage Reviews', icon: 'rate-review', screen: 'displayReviews' },
+    { title: 'Manage Reviews', icon: 'rate-review', screen: 'displayReview' },
   ];
 
   const renderFeatureButton = (feature) => (

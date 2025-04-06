@@ -22,6 +22,9 @@ import {
   UPDATE_REVIEW_REQUEST,
   UPDATE_REVIEW_SUCCESS,
   UPDATE_REVIEW_FAIL,
+  GET_ALL_REVIEWS_REQUEST,
+  GET_ALL_REVIEWS_SUCCESS,
+  GET_ALL_REVIEWS_FAIL,
 } from "../constants";
 
 // Get all products
@@ -121,6 +124,22 @@ export const updateProductReview = (productId, reviewData) => async (dispatch) =
     dispatch({ 
       type: UPDATE_REVIEW_FAIL, 
       payload: error.response?.data.message || error.message 
+    });
+  }
+};
+
+// Get all reviews
+export const getAllReviews = () => async (dispatch) => {
+  try {
+    dispatch({ type: GET_ALL_REVIEWS_REQUEST });
+
+    const { data } = await axios.get(`${API_URL}/products/reviews/all`); // Backend endpoint for fetching all reviews
+
+    dispatch({ type: GET_ALL_REVIEWS_SUCCESS, payload: data.reviews });
+  } catch (error) {
+    dispatch({
+      type: GET_ALL_REVIEWS_FAIL,
+      payload: error.response?.data.message || error.message,
     });
   }
 };
