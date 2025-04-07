@@ -458,6 +458,11 @@ export const getTopOrderedProducts = async (req, res) => {
         }
       },
       {
+        $match: {
+          'productDetails.product_name': { $exists: true, $ne: null }
+        }
+      },
+      {
         $project: {
           _id: 0,
           productId: '$_id',
@@ -466,8 +471,6 @@ export const getTopOrderedProducts = async (req, res) => {
         }
       }
     ]);
-
-
 
     res.status(200).json({ success: true, topProducts });
   } catch (error) {
