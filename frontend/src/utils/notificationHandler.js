@@ -37,13 +37,12 @@ export const setupNotificationListeners = () => {
 
           // Get the product details from the Redux store
           const state = store.getState();
-          const product = state.productState.product; // Access product from productState
+          const product = state.productState.product;
 
-          if (product) {
+          // Only navigate if we have a product and we're not in the review flow
+          if (product && !state.productState.isLoadingForReview) {
             console.log('Navigating to ProductDetail with product:', product);
             navigate('ProductDetail', { product });
-          } else {
-            console.error('Failed to fetch product details.');
           }
         } catch (error) {
           console.error('Error fetching product details:', error.message);

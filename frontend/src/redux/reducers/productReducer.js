@@ -32,6 +32,7 @@ const initialState = {
   product: {},
   loading: false,
   error: null,
+  isLoadingForReview: false,
 };
 
 export const productReducer = (state = initialState, action) => {
@@ -61,6 +62,9 @@ export const productReducer = (state = initialState, action) => {
 
     case DELETE_PRODUCT_SUCCESS:
       return { ...state, loading: false, products: state.products.filter((prod) => prod._id !== action.payload) };
+
+    case 'SET_LOADING_FOR_REVIEW':
+      return { ...state, isLoadingForReview: action.payload };
 
     case GET_PRODUCTS_FAIL:
     case GET_PRODUCT_DETAILS_FAIL:

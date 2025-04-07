@@ -41,15 +41,30 @@ export const getProducts = () => async (dispatch) => {
 };
 
 // Get single product by ID
-export const getProductById = (id) => async (dispatch) => {
+export const getProductById = (id, forReview = false) => async (dispatch) => {
   try {
     dispatch({ type: GET_PRODUCT_DETAILS_REQUEST });
+    
+    // Set flag if we're fetching for review purposes
+    if (forReview) {
+      dispatch({ type: 'SET_LOADING_FOR_REVIEW', payload: true });
+    }
 
     const { data } = await axios.get(`${API_URL}/products/${id}`);
 
     dispatch({ type: GET_PRODUCT_DETAILS_SUCCESS, payload: data.product });
+    
+    // Reset flag after product is fetched
+    if (forReview) {
+      dispatch({ type: 'SET_LOADING_FOR_REVIEW', payload: false });
+    }
   } catch (error) {
     dispatch({ type: GET_PRODUCT_DETAILS_FAIL, payload: error.response?.data.message || error.message });
+    
+    // Reset flag on error
+    if (forReview) {
+      dispatch({ type: 'SET_LOADING_FOR_REVIEW', payload: false });
+    }
   }
 };
 

@@ -41,6 +41,7 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLoadingForReview, setIsLoadingForReview] = useState(false);
   // Track reviewed products
   const [reviewedProductIds, setReviewedProductIds] = useState([]);
 
@@ -108,7 +109,16 @@ const OrderDetailsScreen = ({ route, navigation }) => {
 
   // Get product details from Redux store
   const productState = useSelector(state => state.productState || {});
-  const { product } = productState;
+  const { product, loading: productLoading } = productState;
+
+  // When product is fetched, check if it's for review purposes
+  useEffect(() => {
+    // Only open modal if we were loading for review and product is now loaded
+    if (isLoadingForReview && !productLoading && product) {
+      setIsLoadingForReview(false);
+      setShowReviewModal(true);
+    }
+  }, [product, productLoading, isLoadingForReview]);
 
   // When a review is submitted successfully, update the reviewed products list
   useEffect(() => {
@@ -169,10 +179,15 @@ const OrderDetailsScreen = ({ route, navigation }) => {
   const handleReviewProduct = (product, edit = false) => {
     setSelectedProduct(product);
     setIsEditMode(edit);
-    setShowReviewModal(true);
+    
+    // Set the flag before fetching product details
+    setIsLoadingForReview(true);
     
     // Fetch the latest product details to get updated reviews
     dispatch(getProductById(product._id));
+    
+    // We'll let the useEffect above handle opening the modal
+    // instead of directly setting setShowReviewModal here
   };
 
   const renderOrderItem = ({ item }) => (

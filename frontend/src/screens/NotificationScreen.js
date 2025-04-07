@@ -126,7 +126,13 @@ const NotificationScreen = ({ navigation }) => {
   // When product details are loaded, navigate to product detail screen
   useEffect(() => {
     if (product && product._id && !productLoading) {
-      navigation.navigate('ProductDetail', { product });
+      // Make sure we're not in a review flow before navigating
+      const state = useSelector(state => state);
+      const isReviewFlow = state.productState.isLoadingForReview;
+      
+      if (!isReviewFlow) {
+        navigation.navigate('ProductDetail', { product });
+      }
     }
   }, [product, productLoading, navigation]);
 
