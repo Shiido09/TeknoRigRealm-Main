@@ -1,7 +1,8 @@
 import Product from "../models/productModel.js";
 import Order from "../models/orderModel.js";
 import { User } from "../models/userModel.js";
-
+import { Expo } from "expo-server-sdk";
+import fetch from 'node-fetch';
 // Create a new order
 // export const createOrder = async (req, res) => {
 //   try {
@@ -175,14 +176,14 @@ export const createOrder = async (req, res) => {
 export const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id });
-    res.status(200).json({ 
-      success: true, 
-      orders 
+    res.status(200).json({
+      success: true,
+      orders
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -193,22 +194,22 @@ export const getOrderById = async (req, res) => {
     const order = await Order.findById(req.params.id)
       .populate('user', 'name email')
       .populate('orderItems.product', 'product_name product_images price');
-    
+
     if (!order) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Order not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
       });
     }
 
-    res.status(200).json({ 
-      success: true, 
-      order 
+    res.status(200).json({
+      success: true,
+      order
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -258,30 +259,135 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
+// export const updateOrderStatus = async (req, res) => {
+//   try {
+//     const { status } = req.body;
+//     const order = await Order.findById(req.params.id);
+
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Order not found',
+//       });
+//     }
+
+//     order.orderStatus = status;
+
+
+//     if (status === 'Completed') {
+//       order.deliveredAt = Date.now();
+//     }
+
+//     await order.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: 'Order status updated successfully',
+//       order,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+// export const updateOrderStatus = async (req, res) => {
+//   try {
+//     const { status } = req.body;
+//     const order = await Order.findById(req.params.id).populate("user"); // Assuming `user` is a reference in the Order model
+
+//     if (!order) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Order not found",
+//       });
+//     }
+
+//     order.orderStatus = status;
+
+//     if (status === "Completed") {
+//       order.deliveredAt = Date.now();
+//     }
+
+//     await order.save();
+
+//     // Send push notification
+//     const expo = new Expo();
+//     const user = await User.findById(order.user._id); // Fetch the user associated with the order
+
+//     if (user && user.pushToken && Expo.isExpoPushToken(user.pushToken)) {
+//       const messages = [
+//         {
+//           to: user.pushToken,
+//           sound: "default",
+//           title: "Order Status Updated",
+//           body: `Your order status is now: ${status}`,
+//           data: { orderId: order._id },
+//         },
+//       ];
+
+//       try {
+//         const ticket = await expo.sendPushNotificationsAsync(messages);
+//         console.log('Notification ticket:', ticket);
+//       } catch (error) {
+//         console.error('Error sending notification:', error);
+//       }
+//     } else {
+//       console.error('Invalid or missing push token:', user.pushToken);
+//     } ole.log(user.pushToken);
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Order status updated successfully",
+//       order,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
 export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate("user");
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found',
+        message: "Order not found",
       });
     }
 
     order.orderStatus = status;
 
-
-    if (status === 'Completed') {
+    if (status === "Completed") {
       order.deliveredAt = Date.now();
     }
 
     await order.save();
 
+    // Send push notification
+    const user = await User.findById(order.user._id);
+    if (user && user.pushToken) {
+      await sendPushNotification(
+        user.pushToken,
+        "Order Status Updated",
+        `Your order status is now: ${status}`,
+        { orderId: order._id } // Include orderId in the data
+      );
+    } else {
+      console.error('Invalid or missing push token:', user?.pushToken);
+    }
+    console.log(user.pushToken);
+    console.log("Order status updated:", status);
     res.status(200).json({
       success: true,
-      message: 'Order status updated successfully',
+      message: "Order status updated successfully",
       order,
     });
   } catch (error) {
@@ -292,6 +398,33 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
+export const sendPushNotification = async (pushToken, title, body, data) => {
+  try {
+    const notificationPayload = {
+      to: pushToken,
+      sound: 'default',
+      title: title,
+      body: body,
+      data: data, // Include the data object with orderId
+    };
+
+    // Log the notification payload
+    console.log('Notification payload:', notificationPayload);
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(notificationPayload),
+    });
+
+    const responseData = await response.json();
+    console.log('Notification sent successfully:', responseData);
+  } catch (error) {
+    console.error('Error sending notification:', error.message);
+  }
+};
 
 export const getTopOrderedProducts = async (req, res) => {
   try {

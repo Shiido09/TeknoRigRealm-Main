@@ -1,12 +1,12 @@
-import cloudinary from "../config/cloudinary.js"; 
+import cloudinary from "../config/cloudinary.js";
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
 import { User } from '../models/userModel.js';
-
+import { sendPushNotification } from './orderController.js';
 // Create a Product
 export const createProduct = async (req, res) => {
   try {
-    const { product_name, price, stocks, description, category } = req.body;
+    const { product_name, price, discount, stocks, description, category } = req.body;
 
     let product_images = [];
     if (req.files) {
@@ -20,6 +20,7 @@ export const createProduct = async (req, res) => {
       product_name,
       product_images,
       price,
+      discount, // Include discount in product creation
       stocks,
       description,
       category,
@@ -31,6 +32,7 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // Get all products
 export const getProducts = async (req, res) => {
@@ -58,8 +60,8 @@ export const getProductById = async (req, res) => {
 // Update a product
 export const updateProduct = async (req, res) => {
   try {
-    const { product_name, price, stocks, description, category } = req.body;
-    
+    const { product_name, price, discount, stocks, description, category } = req.body;
+
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
@@ -80,19 +82,39 @@ export const updateProduct = async (req, res) => {
       }
     }
 
+    // Update product fields
     product.product_name = product_name;
     product.price = price;
+    product.discount = discount; // Update discount
     product.stocks = stocks;
     product.description = description;
     product.category = category;
     product.product_images = product_images;
 
     await product.save();
+
+    // Send push notification if discount is updated
+    if (discount > 0) {
+      const users = await User.find({ pushToken: { $exists: true, $ne: null } }); // Get users with push tokens
+      const notificationPayload = {
+        title: "New Discount Available!",
+        body: `${product_name} is now available at ${discount}% off!`,
+        data: { productId: product._id },
+      };
+
+      for (const user of users) {
+        if (user.pushToken) {
+          await sendPushNotification(user.pushToken, notificationPayload.title, notificationPayload.body, notificationPayload.data);
+        }
+      }
+    }
+
     res.status(200).json({ success: true, product });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // Delete a product
 export const deleteProduct = async (req, res) => {
@@ -122,18 +144,18 @@ export const createProductReview = async (req, res) => {
 
     // Validate input
     if (!rating || !comment || !orderId || !userId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please provide all required fields" 
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields"
       });
     }
 
     // Find the product
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
       });
     }
 
@@ -143,9 +165,9 @@ export const createProductReview = async (req, res) => {
     );
 
     if (alreadyReviewed) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "You have already reviewed this product for this order" 
+      return res.status(400).json({
+        success: false,
+        message: "You have already reviewed this product for this order"
       });
     }
 
@@ -159,10 +181,10 @@ export const createProductReview = async (req, res) => {
 
     // Add review to the product
     product.reviews.push(review);
-    
+
     // Update number of reviews
     product.numOfReviews = product.reviews.length;
-    
+
     // Recalculate product rating if needed
     // This is optional but could be added to calculate average rating
 
@@ -176,9 +198,9 @@ export const createProductReview = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating review:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -191,18 +213,18 @@ export const updateProductReview = async (req, res) => {
 
     // Validate input
     if (!rating || !comment || !orderId || !userId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please provide all required fields" 
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields"
       });
     }
 
     // Find the product
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Product not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
       });
     }
 
@@ -212,9 +234,9 @@ export const updateProductReview = async (req, res) => {
     );
 
     if (reviewIndex === -1) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Review not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Review not found"
       });
     }
 
@@ -232,9 +254,9 @@ export const updateProductReview = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating review:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -266,5 +288,24 @@ export const getAdminStats = async (req, res) => {
   } catch (error) {
     console.error('Error fetching admin stats:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch admin stats' });
+  }
+};
+
+export const getAllReviews = async (req, res) => {
+  try {
+    // Aggregate all reviews from all products
+    const products = await Product.find().populate('reviews.user', 'name email'); // Populate user details
+    const allReviews = products.flatMap((product) =>
+      product.reviews.map((review) => ({
+        productId: product._id,
+        productName: product.product_name,
+        ...review._doc, // Spread review details
+      }))
+    );
+    console.log('All Reviews:', allReviews);
+    res.status(200).json({ success: true, reviews: allReviews });
+  } catch (error) {
+    console.error('Error fetching all reviews:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -58,7 +58,32 @@ const styles = StyleSheet.create({
   dateText: {
     color: '#AAAAAA',
     fontSize: 12,
-  }
+  },
+  productName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // Change this to a visible color
+    marginBottom: 4,
+  },
+  username: {
+    fontSize: 14,
+    color: '#AAAAAA', // Light gray for contrast
+    marginBottom: 4,
+  },
+  orderNumber: {
+    fontSize: 14,
+    color: '#CCCCCC', // Slightly lighter gray
+    marginBottom: 4,
+  },
+  reviewText: {
+    fontSize: 14,
+    color: '#FFFFFF', // White for visibility
+    marginBottom: 8,
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#AAAAAA', // Light gray for the date
+  },
 });
 
 export default styles;

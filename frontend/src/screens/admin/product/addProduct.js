@@ -24,6 +24,7 @@ const AddProductScreen = ({ navigation }) => {
 
     const [productName, setProductName] = useState('');
     const [price, setPrice] = useState('');
+    const [discount, setDiscount] = useState(''); // New state for discount
     const [stocks, setStocks] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState(CATEGORIES[0]);
@@ -38,20 +39,20 @@ const AddProductScreen = ({ navigation }) => {
                 Alert.alert('Permission Denied', 'We need access to your gallery to upload images.');
                 return;
             }
-    
+
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
                 quality: 1,
             });
-    
+
             console.log('Image Picker Result:', result);
-    
+
             if (result.canceled) {
                 console.log('Image selection was canceled.');
                 return;
             }
-    
+
             // Access the URI from the assets array
             if (result.assets && result.assets.length > 0) {
                 const selectedImage = result.assets[0].uri;
@@ -65,21 +66,22 @@ const AddProductScreen = ({ navigation }) => {
             Alert.alert('Error', 'Something went wrong while picking the image.');
         }
     };
-    
+
     const handleAddProduct = async () => {
         if (!productName || !price || !stocks || !description || !category) {
             Alert.alert('Error', 'Please fill in all fields.');
             return;
         }
-    
+
         const formData = new FormData();
-    
+
         formData.append('product_name', productName);
         formData.append('price', price);
+        formData.append('discount', discount); // Include discount in form data
         formData.append('stocks', stocks);
         formData.append('description', description);
         formData.append('category', category);
-    
+
         // Append images to the FormData
         images.forEach((image, index) => {
             formData.append('product_images', {
@@ -88,7 +90,7 @@ const AddProductScreen = ({ navigation }) => {
                 type: 'image/jpeg', // Ensure the correct MIME type
             });
         });
-    
+
         try {
             await dispatch(createProduct(formData));
             Alert.alert('Success', 'Product added successfully!', [
@@ -131,6 +133,18 @@ const AddProductScreen = ({ navigation }) => {
                         placeholderTextColor="#666666"
                         value={price}
                         onChangeText={setPrice}
+                        keyboardType="numeric"
+                    />
+                </View>
+
+                <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Discount (%)</Text> {/* New input for discount */}
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter discount percentage"
+                        placeholderTextColor="#666666"
+                        value={discount}
+                        onChangeText={setDiscount}
                         keyboardType="numeric"
                     />
                 </View>

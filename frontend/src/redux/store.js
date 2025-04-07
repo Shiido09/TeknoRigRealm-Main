@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { productReducer, productReviewReducer } from "./reducers/productReducer";
-import { 
-  orderCreateReducer, 
-  orderDetailsReducer, 
+import { productReducer, productReviewReducer, allReviewsReducer } from "./reducers/productReducer";
+import {
+  orderCreateReducer,
+  orderDetailsReducer,
   orderListMyReducer,
   adminOrdersReducer,
   orderUpdateStatusReducer,
@@ -18,11 +18,12 @@ const store = configureStore({
     orderCreate: orderCreateReducer,
     orderDetails: orderDetailsReducer,
     orderListMy: orderListMyReducer,
-    adminOrders: adminOrdersReducer, 
+    adminOrders: adminOrdersReducer,
     orderUpdateStatus: orderUpdateStatusReducer,
     stats: statsReducer,
     adminUsers: adminUsersReducer,
     topProducts: topProductsReducer,
+    allReviews: allReviewsReducer
   },
 });
 

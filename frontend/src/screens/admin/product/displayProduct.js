@@ -98,6 +98,11 @@ const AdminProductScreen = ({ navigation }) => {
             <View style={styles.productInfo}>
                 <Text style={styles.productName}>{item.product_name}</Text>
                 <Text style={styles.productPrice}>₱{item.price.toFixed(2)}</Text>
+                {item.discount > 0 && (
+                    <Text style={styles.productDiscount}>
+                        Discount: {item.discount}%
+                    </Text>
+                )}
                 <View style={styles.stockContainer}>
                     <MaterialIcons name="inventory" size={16} color="#AAAAAA" />
                     <Text style={styles.productStock}>{item.stocks}</Text>

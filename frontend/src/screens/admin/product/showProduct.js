@@ -77,6 +77,11 @@ const ShowProduct = ({ navigation, route }) => {
                         <Text style={styles.productPrice}>
                             ₱{Number(product?.price || 0).toFixed(2)}
                         </Text>
+                        {product.discount > 0 && (
+                            <Text style={styles.productDiscount}>
+                                Discount: {product.discount}%
+                            </Text>
+                        )}
 
                     </View>
 
