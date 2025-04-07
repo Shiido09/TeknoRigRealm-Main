@@ -40,6 +40,10 @@ export const addToCart = async (product) => {
     // Get the userId (will work even if logged out since we no longer delete it)
     const userId = await getItem('userId') || 'guest';
     
+    // Calculate the discounted price if applicable
+    const hasDiscount = product.discount > 0;
+    const priceToUse = hasDiscount ? product.price * (1 - product.discount / 100) : product.price;
+    
     // Check if the product already exists in the cart
     const existingItem = await db.getFirstAsync(
       'SELECT * FROM cart_items WHERE userId = ? AND productId = ?',
@@ -48,21 +52,22 @@ export const addToCart = async (product) => {
     );
     
     if (existingItem) {
-      // Product exists, update quantity
+      // Product exists, update quantity and price (to get the latest discount)
       const newQuantity = existingItem.quantity + 1;
       await db.runAsync(
-        'UPDATE cart_items SET quantity = ? WHERE id = ?', 
+        'UPDATE cart_items SET quantity = ?, price = ? WHERE id = ?', 
         newQuantity, 
+        priceToUse,
         existingItem.id
       );
     } else {
-      // Product doesn't exist, insert new item
+      // Product doesn't exist, insert new item with calculated price
       await db.runAsync(
         'INSERT INTO cart_items (userId, productId, productName, price, imageUrl, quantity, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)',
         userId,
         product._id,
         product.product_name,
-        product.price,
+        priceToUse, // Use the discounted price when applicable
         product.product_images[0]?.url || 'https://via.placeholder.com/150/222222/FFFFFF?text=No+Image',
         1,
         Date.now()

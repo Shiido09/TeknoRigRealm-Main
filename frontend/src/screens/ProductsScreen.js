@@ -112,6 +112,8 @@ const ProductsScreen = ({ navigation }) => {
   // Render each product
   const renderProductItem = ({ item, index }) => {
     const isOddColumn = (index % 2) === 1;
+    const hasDiscount = item.discount > 0;
+    const discountedPrice = hasDiscount ? item.price * (1 - item.discount / 100) : item.price;
 
     return (
       <TouchableOpacity 
@@ -123,9 +125,22 @@ const ProductsScreen = ({ navigation }) => {
             source={{ uri: item.product_images[0]?.url || 'https://via.placeholder.com/150/222222/FFFFFF?text=No+Image' }} 
             style={styles.productImage} 
           />
+          {hasDiscount && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>{item.discount}% OFF</Text>
+            </View>
+          )}
         </View>
         <Text style={styles.productName} numberOfLines={2}>{item.product_name}</Text>
-        <Text style={styles.productPrice}>₱{item.price.toFixed(2)}</Text>
+        
+        {hasDiscount ? (
+          <View style={styles.priceContainer}>
+            <Text style={styles.originalPrice}>₱{item.price.toFixed(2)}</Text>
+            <Text style={styles.productPrice}>₱{discountedPrice.toFixed(2)}</Text>
+          </View>
+        ) : (
+          <Text style={styles.productPrice}>₱{item.price.toFixed(2)}</Text>
+        )}
         
         {isLoggedIn && (
           <TouchableOpacity 

@@ -114,7 +114,20 @@ const ProductDetailScreen = ({ route, navigation }) => {
         {/* Product Details */}
         <View style={styles.productDetails}>
           <Text style={styles.productName}>{product.product_name}</Text>
-          <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
+          
+          {product.discount > 0 ? (
+            <View style={styles.priceContainer}>
+              <Text style={styles.originalPrice}>${product.price.toFixed(2)}</Text>
+              <Text style={styles.productPrice}>
+                ${(product.price * (1 - product.discount / 100)).toFixed(2)}
+              </Text>
+              <View style={styles.discountBadge}>
+                <Text style={styles.discountText}>{product.discount}% OFF</Text>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
+          )}
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Category:</Text>
@@ -266,6 +279,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4CAF50',
     marginBottom: 16,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  originalPrice: {
+    fontSize: 16,
+    color: '#AAAAAA',
+    textDecorationLine: 'line-through',
+    marginRight: 8,
+  },
+  discountBadge: {
+    backgroundColor: '#FF4500',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   detailRow: {
     flexDirection: 'row',
