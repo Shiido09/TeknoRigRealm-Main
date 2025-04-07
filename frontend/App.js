@@ -217,17 +217,57 @@
 //   return <AppNavigator />;
 // };
 
+// import React, { useEffect } from 'react';
+// import { StatusBar } from 'react-native';
+// import { Provider } from 'react-redux';
+// import store from './src/redux/store'; // Ensure correct path
+// import AppNavigator from './src/navigation/AppNavigator';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { configureNotificationHandler, setupNotificationListeners } from './src/utils/notificationHandler'; // Import notification handlers
+
+// export default function App() {
+//   useEffect(() => {
+//     // Configure Google Sign-In
+//     GoogleSignin.configure({
+//       webClientId: '719082158171-ilh6riiei6797ij23kbsvrecuci93rr2.apps.googleusercontent.com',
+//       offlineAccess: true,
+//       forceCodeForRefreshToken: true,
+//       profileImageSize: 150,
+//     });
+
+//     // Configure notifications
+//     configureNotificationHandler();
+//   }, []);
+
+//   return (
+//     <Provider store={store}>
+//       <StatusBar barStyle="light-content" backgroundColor="#121212" />
+//       <AppNavigatorWithNotifications />
+//     </Provider>
+//   );
+// }
+
+// const AppNavigatorWithNotifications = () => {
+//   useEffect(() => {
+//     const cleanup = setupNotificationListeners(); 
+//     return () => cleanup();
+//   }, []);
+
+//   return <AppNavigator />;
+// };
+
+// App.js
 import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { Provider } from 'react-redux';
-import store from './src/redux/store'; // Ensure correct path
+import store from './src/redux/store';
 import AppNavigator from './src/navigation/AppNavigator';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { configureNotificationHandler, setupNotificationListeners } from './src/utils/notificationHandler'; // Import notification handlers
+import { configureNotificationHandler, setupNotificationListeners } from './src/utils/notificationHandler';
+import { navigationRef } from './src/navigation/navigationRef'; // ✅ Add this
 
 export default function App() {
   useEffect(() => {
-    // Configure Google Sign-In
     GoogleSignin.configure({
       webClientId: '719082158171-ilh6riiei6797ij23kbsvrecuci93rr2.apps.googleusercontent.com',
       offlineAccess: true,
@@ -235,7 +275,6 @@ export default function App() {
       profileImageSize: 150,
     });
 
-    // Configure notifications
     configureNotificationHandler();
   }, []);
 
@@ -249,10 +288,9 @@ export default function App() {
 
 const AppNavigatorWithNotifications = () => {
   useEffect(() => {
-    const cleanup = setupNotificationListeners(); // Set up notification listeners
-
-    return () => cleanup(); // Cleanup listeners on unmount
+    const cleanup = setupNotificationListeners(); // no need to pass navigation
+    return () => cleanup();
   }, []);
 
-  return <AppNavigator />;
+  return <AppNavigator ref={navigationRef} />; // ✅ Pass the navigation ref
 };

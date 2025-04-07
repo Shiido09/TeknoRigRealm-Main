@@ -32,14 +32,21 @@ const DisplayReviews = () => {
     <View style={styles.reviewCard}>
       <View style={styles.reviewHeader}>
         <View style={styles.userInfo}>
-          <Text style={styles.productName}>Product: {item.productName || 'Unknown Product'}</Text>
-          <Text style={styles.username}>{item.user?.name || 'Anonymous'}</Text>
-          <Text style={styles.orderNumber}>Order: #{item.orderID || 'N/A'}</Text>
+          <Text style={styles.productName}>
+            Product: {item.productName || 'Unknown Product'}
+          </Text>
+          <Text style={styles.username}>
+            {item.user?.name || 'Anonymous'}
+          </Text>
+          <Text style={styles.orderNumber}>
+            Order: #{item.orderID || 'N/A'}
+          </Text>
         </View>
         {renderStars(item.rating)}
       </View>
-      <Text style={styles.reviewText}>{item.comment}</Text> {/* Ensure comment is wrapped in <Text> */}
-
+      <Text style={styles.reviewText}>
+        {item.comment || 'No comment provided.'}
+      </Text>
     </View>
   );
 

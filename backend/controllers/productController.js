@@ -279,11 +279,22 @@ export const getAdminStats = async (req, res) => {
       },
     ]);
 
+    // Total Reviews
+    const totalReviews = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalReviews: { $sum: '$numOfReviews' }, // Sum up numOfReviews from all products
+        },
+      },
+    ]);
+
     res.status(200).json({
       success: true,
       totalOrders,
       totalUsers,
       totalRevenue: totalRevenue[0]?.totalRevenue || 0,
+      totalReviews: totalReviews[0]?.totalReviews || 0, // Include totalReviews in the response
     });
   } catch (error) {
     console.error('Error fetching admin stats:', error);

@@ -81,57 +81,65 @@ const AdminProductScreen = ({ navigation }) => {
         </ScrollView>
     );
 
-    const renderProductItem = ({ item }) => (
-        <View style={styles.productCard}>
-            <View style={styles.imageContainer}>
-                {item.product_images && item.product_images[0] ? (
-                    <Image
-                        source={{ uri: item.product_images[0].url }}
-                        style={styles.productImage}
-                    />
-                ) : (
-                    <View style={styles.imagePlaceholder}>
-                        <MaterialIcons name="image" size={40} color="#666666" />
-                    </View>
-                )}
-            </View>
-            <View style={styles.productInfo}>
-                <Text style={styles.productName}>{item.product_name}</Text>
-                <Text style={styles.productPrice}>₱{item.price.toFixed(2)}</Text>
-                {item.discount > 0 && (
-                    <Text style={styles.productDiscount}>
-                        Discount: {item.discount}%
-                    </Text>
-                )}
-                <View style={styles.stockContainer}>
-                    <MaterialIcons name="inventory" size={16} color="#AAAAAA" />
-                    <Text style={styles.productStock}>{item.stocks}</Text>
+    const renderProductItem = ({ item }) => {
+        // Calculate the discounted price
+        const discountedPrice = item.discount > 0 
+            ? item.price - (item.price * item.discount) / 100 
+            : item.price;
+    
+        return (
+            <View style={styles.productCard}>
+                <View style={styles.imageContainer}>
+                    {item.product_images && item.product_images[0] ? (
+                        <Image
+                            source={{ uri: item.product_images[0].url }}
+                            style={styles.productImage}
+                        />
+                    ) : (
+                        <View style={styles.imagePlaceholder}>
+                            <MaterialIcons name="image" size={40} color="#666666" />
+                        </View>
+                    )}
                 </View>
-                <Text style={styles.productCategory}>{item.category}</Text>
+                <View style={styles.productInfo}>
+                    <Text style={styles.productName}>{item.product_name}</Text>
+                    <Text style={styles.productPrice}>
+                        ₱{discountedPrice.toFixed(2)}
+                    </Text>
+                    {item.discount > 0 && (
+                        <Text style={styles.productDiscount}>
+                            Original Price: ₱{item.price.toFixed(2)} | Discount: {item.discount}%
+                        </Text>
+                    )}
+                    <View style={styles.stockContainer}>
+                        <MaterialIcons name="inventory" size={16} color="#AAAAAA" />
+                        <Text style={styles.productStock}>{item.stocks}</Text>
+                    </View>
+                    <Text style={styles.productCategory}>{item.category}</Text>
+                </View>
+                <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                        style={[styles.iconButton, styles.viewButton]}
+                        onPress={() => navigation.navigate('showProduct', { productId: item._id })}
+                    >
+                        <MaterialIcons name="visibility" size={24} color="#FFFFFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.iconButton, styles.editButton]}
+                        onPress={() => navigation.navigate('editProduct', { product: item })}
+                    >
+                        <MaterialIcons name="edit" size={24} color="#FFFFFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.iconButton, styles.deleteButton]}
+                        onPress={() => handleDeleteProduct(item._id)}
+                    >
+                        <MaterialIcons name="delete" size={24} color="#FFFFFF" />
+                    </TouchableOpacity>
+                </View>
             </View>
-            <View style={styles.actionButtons}>
-                <TouchableOpacity
-                    style={[styles.iconButton, styles.viewButton]}
-                    onPress={() => navigation.navigate('showProduct', { productId: item._id })}
-                >
-                    <MaterialIcons name="visibility" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.iconButton, styles.editButton]}
-                    onPress={() => navigation.navigate('editProduct', { product: item })}
-                >
-                    <MaterialIcons name="edit" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.iconButton, styles.deleteButton]}
-                    onPress={() => handleDeleteProduct(item._id)}
-                >
-                    <MaterialIcons name="delete" size={24} color="#FFFFFF" />
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
+        );
+    };
     if (loading) {
         return (
             <View style={[styles.container, styles.centered]}>

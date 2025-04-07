@@ -222,7 +222,7 @@ const AdminDashboard = ({ navigation }) => {
               })}
               {renderStatCard({
                 title: 'Total Reviews',
-                value: 200,
+                value: `${stats.totalReviews}`,
                 icon: 'rate-review',
                 color: '#D32F2F',
                 backgroundColor: '#FFCDD2',
