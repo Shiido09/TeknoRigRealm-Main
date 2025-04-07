@@ -115,6 +115,7 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 8,
     overflow: 'hidden',
+    position: 'relative', // Add this for positioning the discount badge
   },
   productImage: {
     width: '100%',
@@ -127,11 +128,37 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 5,
   },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  originalPrice: {
+    fontSize: 12,
+    color: '#AAAAAA',
+    fontWeight: 'normal',
+    textDecorationLine: 'line-through',
+    marginRight: 5,
+  },
   productPrice: {
     fontSize: 14,
     color: '#4CAF50',
     fontWeight: 'bold',
     marginBottom: 8, // Add margin to make room for the button
+  },
+  discountBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#FF4500',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderBottomLeftRadius: 8,
+  },
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   addToCartButton: {
     backgroundColor: '#4CAF50',
