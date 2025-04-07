@@ -240,16 +240,26 @@ export const getOrderById = async (req, res) => {
 //     });
 //   }
 // };
-
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate('user', 'name email')
       .populate('orderItems.product', 'product_name product_images price');
 
+    // Filter out orderItems where the product no longer exists
+    const filteredOrders = orders.map(order => {
+      const filteredItems = order.orderItems.filter(
+        item => item.product !== null
+      );
+      return {
+        ...order._doc,
+        orderItems: filteredItems,
+      };
+    });
+
     res.status(200).json({
       success: true,
-      orders,
+      orders: filteredOrders,
     });
   } catch (error) {
     res.status(500).json({
@@ -258,6 +268,7 @@ export const getAllOrders = async (req, res) => {
     });
   }
 };
+
 
 // export const updateOrderStatus = async (req, res) => {
 //   try {
