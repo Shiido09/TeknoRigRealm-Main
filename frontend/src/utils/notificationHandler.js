@@ -23,6 +23,7 @@ export const setupNotificationListeners = (navigation) => {
       if (orderId) {
         console.log('Navigate to OrderDetails with orderId:', orderId);
         navigation.navigate('OrderDetails', { orderId }); // Navigate to the order details screen
+        console.log('Navigated', orderId);
       }
     } else {
       console.log('User is not logged in. Ignoring notification response.');
