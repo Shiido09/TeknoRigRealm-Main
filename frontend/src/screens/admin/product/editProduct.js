@@ -79,7 +79,7 @@ const EditProductScreen = ({ navigation, route }) => {
             Alert.alert('Error', 'Please fill in all fields.');
             return;
         }
-    
+
         Alert.alert(
             'Confirm Update',
             'Are you sure you want to update this product?',
@@ -98,9 +98,9 @@ const EditProductScreen = ({ navigation, route }) => {
                         formData.append('stocks', stocks);
                         formData.append('description', description);
                         formData.append('category', category);
-    
+
                         // Include existing images if no new images are selected
-                        if (images.length === 0 && product.product_images) {
+                        if (images.length === 0) {
                             product.product_images.forEach((image, index) => {
                                 formData.append('product_images', {
                                     uri: image.url,
@@ -117,7 +117,7 @@ const EditProductScreen = ({ navigation, route }) => {
                                 });
                             });
                         }
-    
+
                         try {
                             await dispatch(updateProduct(product._id, formData));
                             Alert.alert('Success', 'Product updated successfully!', [
